@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: my-django-mongo-app
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn sejong_backend.wsgi --log-file -
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: sejong_backend.settings
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: "*"
+      - key: MONGO_URL
+        value: mongodb+srv://ikromi:ikromi@cluster1.qs4nk.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1

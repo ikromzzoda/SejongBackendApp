@@ -88,16 +88,16 @@ WSGI_APPLICATION = 'sejong_backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
-# DATABASES = {
-#     "default": django_mongodb_backend.parse_uri("mongodb+srv://ikromi:ikromi@cluster1.qs4nk.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1", db_name="ikromi"),
-# }
-
 DATABASES = {
-            'default': django_mongodb_backend.parse_uri(
-                'mongodb://localhost:27017/admin', 
-                db_name='SejongAppDB'
-                ),
+    "default": django_mongodb_backend.parse_uri("mongodb+srv://ikromi:ikromi@cluster1.qs4nk.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1", db_name="ikromi"),
 }
+
+# DATABASES = {
+#             'default': django_mongodb_backend.parse_uri(
+#                 'mongodb://localhost:27017/admin', 
+#                 db_name='SejongAppDB'
+#                 ),
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
@@ -148,5 +148,5 @@ MIGRATION_MODULES = {
 
 AUTH_USER_MODEL = 'users.User'
 
-GOOGLE_DRIVE_STORAGE_JSON_KEY_FILE = 'sejong-cloud-2cbb1e05cf28.json'
+GOOGLE_DRIVE_STORAGE_JSON_KEY_FILE = 'sejong-cloud-ff73493133e6.json'
 # GOOGLE_DRIVE_STORAGE_MEDIA_ROOT = '<base google drive path for file uploads>' # OPTIONAL
