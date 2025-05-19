@@ -1,0 +1,4 @@
+Django==5.1.8
+django-mongodb-backend
+gunicorn
+whitenoise
