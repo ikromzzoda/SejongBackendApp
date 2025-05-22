@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = '1u695jxow=#k$d5e_bd$(x%2glm)z*s5h^0tt6nrgvy#8bo^jc'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -89,7 +89,7 @@ WSGI_APPLICATION = 'sejong_backend.wsgi.application'
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
 DATABASES = {
-    "default": django_mongodb_backend.parse_uri("mongodb+srv://ikromi:ikromi@cluster1.qs4nk.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1", db_name="ikromi"),
+    "default": django_mongodb_backend.parse_uri("mongodb+srv://dushanbe3sejong:dNZw93iCW2XeCyg5@cluster1.eiwbei3.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1", db_name="sejong_db"),
 }
 
 # DATABASES = {
