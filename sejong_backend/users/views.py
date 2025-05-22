@@ -111,3 +111,22 @@ def change_password(request):
             return JsonResponse({"ERROR": str(e)})
         
     return JsonResponse({"error": "Only POST requests are allowed"})
+
+
+def change_avatar(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body.decode("UTF-8"))
+            new_avatar = data.get("new_avatar")
+
+            if not new_avatar:
+                return JsonResponse({"message": "Avatar is required"}, status=400)
+            
+            user = request.user
+            user.avatar = new_avatar
+            user.save()
+        
+        except Exception as e:
+            return JsonResponse({"ERROR": str(e)})
+        
+    return JsonResponse({"error": "Only POST requests are allowed"})
