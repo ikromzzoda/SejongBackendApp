@@ -3,44 +3,25 @@ from django.http import JsonResponse
 from .models import User, Groups
 from django.contrib.auth import authenticate, login
 from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 import json
 from rest_framework.authtoken.models import Token
 
-# def get_all_users(request):
-#     if request.method == "GET":
-#         users = User.objects.all()
-#         data = []
 
-#         for user in users:
-#             data.append({
-#                 'username': user.username,
-#                 'fullname': user.fullname,
-#                 'email': user.email,
-#                 'phone_number': user.phone_number,
-#                 'status': user.status,
-#                 'groups': user.get_groups(),
-#                 'avatar': user.avatar_id,
-#                 'date_joined': user.date_joined,
-#                 'is_active': user.is_active,
-#                 'is_staff': user.is_staff,
-#                 'is_superuser': user.is_superuser,
-#             })
+def check_token(request):
+    # if request.method == "GET":
+    auth_token = request.headers.get("token")
+    if not auth_token:
+        return JsonResponse({"error": "Token not provided"}, status=401)
 
-#     return JsonResponse(data, safe=False)
+    try:
+        token = Token.objects.get(key=auth_token)
+        user = token.user
+    except Token.DoesNotExist:
+        return JsonResponse({"error": "Invalid token"}, status=401)
 
-def get_all_groups(request):
-    if request.method == "GET":
-        groups = Groups.objects.all()
-        data = []
+    return user
 
-        for group in groups:
-            data.append({
-                'name': group.name,
-                'created_at': group.created_at,
-                'user_count': group.user_count(),
-                'participants': group.participant_names(),
-            })
-    return JsonResponse(data, safe=False)
 
 @csrf_exempt
 def login_view(request):
@@ -56,77 +37,84 @@ def login_view(request):
             if user:
                 token = Token.objects.get(user=user)
                 return JsonResponse({"token": token.key})
-                # return JsonResponse({"user_data": {
-                #     "avatar": user.avatar_id,
-                #     "username": user.username,
-                #     "fullname": user.fullname,
-                #     "phone_number": user.phone_number,
-                #     "email":user.email,
-                #     'status': user.status,
-                #     "group": user.get_groups(),
-                # }})
+                
             else:
                 return JsonResponse({"error": "user not found"})
         except Exception as e:
             return JsonResponse({"ERROR": str(e)})
     return JsonResponse({"message": "Only POST requests are allowed"})
 
+
+def get_user_groups(request):
+    if request.method == "GET":
+        user = check_token(request)
+
+        if user:
+            return JsonResponse({
+                'groups': user.get_groups(),
+            })
+    
+@csrf_exempt
 def change_username(request):
     if request.method == "POST":
-        try:
-            data = json.loads(request.body.decode("utf-8"))
-            new_username = data.get("new_password")
+        token = check_token(request)
+        if token:
+            print(request)
+            try:
+                data = json.loads(request.body.decode("utf-8"))
+                new_username = data.get("new_username")
+                if not new_username:
+                    return JsonResponse({"error": "Username is required"}, status=400)
+                
+                if User.objects.filter(username = new_username).exists():
+                    return JsonResponse({"error": "Username already taken"})
+                
+                token.username = new_username
+                token.save()
+                return JsonResponse({"message": "Username updated successfully", "new_username": new_username})
 
-            if not new_username:
-                return JsonResponse({"error": "Username is required"}, status=400)
+            except Exception as e:
+                return JsonResponse({"ERROR": str(e)})
             
-            if User.objects.filter(username = new_username).exists():
-                return JsonResponse({"error": "Username already taken"})
-            
-            user = request.user
-            user.username = new_username
-            user.save()
-            return JsonResponse({"message": "Username updated successfully", "new_password": new_username})
-
-        except Exception as e:
-            return JsonResponse({"ERROR": str(e)})
-        
     return JsonResponse({"error": "Only POST requests are allowed"})
 
+@csrf_exempt
 def change_password(request):
     if request.method == "POST":
-        try:
-            data = json.loads(request.body.decode("utf-8"))
-            new_password = data.get("new_password")
+        token = check_token(request)
+        if token:
+            try:
+                data = json.loads(request.body.decode("utf-8"))
+                new_password = data.get("new_password")
 
-            if not new_password:
-                return JsonResponse({"error": "Password is required"}, status=400)
-            
-            user = request.user
-            user.password = new_password
-            user.save()
-            return JsonResponse({"message": "Password updated successfully", "new_password": new_password})
+                if not new_password:
+                    return JsonResponse({"error": "Password is required"}, status=400)
+                
+                token.password = new_password
+                token.save()
+                return JsonResponse({"message": "Password updated successfully", "new_password": new_password})
 
-        except Exception as e:
-            return JsonResponse({"ERROR": str(e)})
+            except Exception as e:
+                return JsonResponse({"ERROR": str(e)})
         
     return JsonResponse({"error": "Only POST requests are allowed"})
 
-
+@csrf_exempt
 def change_avatar(request):
     if request.method == "POST":
-        try:
-            data = json.loads(request.body.decode("UTF-8"))
-            new_avatar = data.get("new_avatar")
+        token = check_token(request)
+        if token:
+            try:
+                data = json.loads(request.body.decode("UTF-8"))
+                new_avatar = data.get("new_avatar")
 
-            if not new_avatar:
-                return JsonResponse({"message": "Avatar is required"}, status=400)
+                if not new_avatar:
+                    return JsonResponse({"message": "Avatar is required"}, status=400)
+                
+                token.avatar = new_avatar
+                token.save()
             
-            user = request.user
-            user.avatar = new_avatar
-            user.save()
-        
-        except Exception as e:
-            return JsonResponse({"ERROR": str(e)})
+            except Exception as e:
+                return JsonResponse({"ERROR": str(e)})
         
     return JsonResponse({"error": "Only POST requests are allowed"})
