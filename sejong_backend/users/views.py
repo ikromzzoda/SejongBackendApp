@@ -46,12 +46,31 @@ def login_view(request):
 
 def get_user_groups(request):
     if request.method == "GET":
-        user = check_token(request)
+        token = check_token(request)
 
-        if user:
+        if token:
             return JsonResponse({
-                'groups': user.get_groups(),
+                'groups': token.get_groups(),
             })
+
+
+def get_profile_info(request):
+    if request.method == "GET":
+        token = check_token(request)
+
+        if token:
+            return JsonResponse ({
+                "username": token.username,
+                "avatar": token.avatar_id,
+                "fullname": token.fullname,
+                "number": token.phone_number,
+                "email": token.email,
+                "status": token.status,
+                "groups": token.get_groups(),
+                "password": token.password,
+        })            
+            
+
     
 @csrf_exempt
 def change_username(request):
