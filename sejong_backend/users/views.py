@@ -9,7 +9,6 @@ from rest_framework.authtoken.models import Token
 
 
 def check_token(request):
-    # if request.method == "GET":
     auth_token = request.headers.get("token")
     if not auth_token:
         return JsonResponse({"error": "Token not provided"}, status=401)
@@ -59,7 +58,6 @@ def change_username(request):
     if request.method == "POST":
         token = check_token(request)
         if token:
-            print(request)
             try:
                 data = json.loads(request.body.decode("utf-8"))
                 new_username = data.get("new_username")
@@ -90,7 +88,7 @@ def change_password(request):
                 if not new_password:
                     return JsonResponse({"error": "Password is required"}, status=400)
                 
-                token.password = new_password
+                token.set_password(new_password)
                 token.save()
                 return JsonResponse({"message": "Password updated successfully", "new_password": new_password})
 
