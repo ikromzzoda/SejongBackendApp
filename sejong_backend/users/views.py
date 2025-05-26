@@ -63,11 +63,10 @@ def get_profile_info(request):
                 "username": token.username,
                 "avatar": token.avatar_id,
                 "fullname": token.fullname,
-                "number": token.phone_number,
+                # "number": token.phone_number,
                 "email": token.email,
                 "status": token.status,
                 "groups": token.get_groups(),
-                "password": token.password,
         })            
             
 
