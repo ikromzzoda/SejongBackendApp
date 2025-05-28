@@ -134,3 +134,25 @@ def change_avatar(request):
                 return JsonResponse({"ERROR": str(e)})
         
     return JsonResponse({"error": "Only POST requests are allowed"})
+
+
+@csrf_exempt
+def change_number(request):
+    if request.method == "POST":
+        token = check_token(request)
+        if token:
+            try:
+                data = json.load(request.body.decode("UTF-8"))
+                new_number = data.get("new_number")
+
+                if not new_number:
+                    return JsonResponse({"message": "PhoneNumber is required"}, status=400)
+                
+                token.phone_number = new_number
+                token.save()
+
+            except Exception as e:
+                return JsonResponse({"ERROR": str(e)})
+
+    return JsonResponse({"error": "Only POST requests are allowed"})
+                
