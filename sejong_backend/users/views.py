@@ -43,16 +43,6 @@ def login_view(request):
     return JsonResponse({"message": "Only POST requests are allowed"})
 
 
-def get_user_groups(request):
-    if request.method == "GET":
-        token = check_token(request)
-
-        if token:
-            return JsonResponse({
-                'groups': token.get_groups(),
-            })
-
-
 def get_profile_info(request):
     if request.method == "GET":
         token = check_token(request)
@@ -102,7 +92,7 @@ def change_info(request):
                 password = data.get("password")
                 phone_number = data.get("phone_number")
                 email = data.get("email")
-                avatar = data.get("avatar")
+                # avatar = data.get("avatar")
                 
                 if username:
                     token.username = username
@@ -126,6 +116,17 @@ def change_info(request):
             except Exception as e:
                 return JsonResponse({"ERROR": str(e)})
 
+
+
+
+# def get_user_groups(request):
+#     if request.method == "GET":
+#         token = check_token(request)
+
+#         if token:
+#             return JsonResponse({
+#                 'groups': token.get_groups(),
+#             })
 
 
 # @csrf_exempt
