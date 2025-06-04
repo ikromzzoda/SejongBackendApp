@@ -4,6 +4,8 @@ from .models import Schedule, TimeSlot, Announcement, AnnouncementImage
 # Register Schedule model
 @admin.register(Schedule)
 class ScheduleAdmin(admin.ModelAdmin):
+    readonly_fields = ('time',)
+
     list_display = ('group_name', 'teacher')
     search_fields = ('group_name', 'teacher')
     list_filter = ('group', 'teacher', 'book')
@@ -11,6 +13,8 @@ class ScheduleAdmin(admin.ModelAdmin):
 
 @admin.register(Announcement)
 class AnnouncementAdmin(admin.ModelAdmin):
+    readonly_fields = ('custom_id', 'images',)
+
     list_display = ('title', 'author', 'time_posted')
     search_fields = ('title',)
     list_filter = ('title', 'time_posted')
@@ -25,6 +29,8 @@ class TimeSlotAdmin(admin.ModelAdmin):
 
 @admin.register(AnnouncementImage)
 class AnnouncementImageAdmin(admin.ModelAdmin):
+    readonly_fields = ('google_drive_file_id',)
+
     list_display = ('image',)
     search_fields = ('image',)  # Add search functionality
     list_filter = ('image',)

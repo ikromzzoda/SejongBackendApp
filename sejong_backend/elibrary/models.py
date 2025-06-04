@@ -20,8 +20,8 @@ class Book(models.Model):
     published_date = models.DateField(verbose_name="Date of publication", blank=True, null=True)
     created_at = models.DateTimeField(default=timezone.now)
 
-    cover_id = models.CharField(max_length=250, blank=True, null=True, help_text="<strong><span style='font-size: 16px;'>Don't touch!!!</span></strong>")
-    file_id = models.CharField(max_length=250, blank=True, null=True, help_text="<strong><span style='font-size: 16px;'>Don't touch!!!</span></strong>")
+    cover_id = models.CharField(max_length=250, blank=True, null=True,) #help_text="<strong><span style='font-size: 16px;'>Don't touch!!!</span></strong>"
+    file_id = models.CharField(max_length=250, blank=True, null=True,) #help_text="<strong><span style='font-size: 16px;'>Don't touch!!!</span></strong>"
 
     class Meta:
         db_table = 'elibrary'
