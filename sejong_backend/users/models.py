@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.db import models
 from django.utils import timezone
+from datetime import timedelta
 from django.core.validators import RegexValidator
 from gdstorage.storage import GoogleDriveStorage
 import re
@@ -123,3 +124,4 @@ class Groups(models.Model):
 def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:
         Token.objects.create(user=instance)
+    
