@@ -37,7 +37,7 @@ def login_view(request):
                 return JsonResponse({"token": token.key})
                 
             else:
-                return JsonResponse({"error": "user not found"})
+                return JsonResponse({"error": "user not found"}) 
         except Exception as e:
             return JsonResponse({"ERROR": str(e)})
     return JsonResponse({"message": "Only POST requests are allowed"})
