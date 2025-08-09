@@ -9,6 +9,7 @@ admin.site.unregister(Group)
 class UserAdmin(BaseUserAdmin):
     form = UserAdminForm
     model = User
+    readonly_fields = ('avatar_id',)
 
     list_display = ("username", "fullname", "email", "phone_number", "status", "date_joined", "is_active") #group couldn't add, because group is ManytoMany
     list_filter = list_filter = ("status", "group", "date_joined", "is_active")
@@ -24,7 +25,7 @@ class UserAdmin(BaseUserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('username', 'fullname', 'email', 'phone_number', 'status', 'group', 'avatar', 'password1', 'password2', 'is_staff', 'is_active', 'avatar_id')}
+            'fields': ('username', 'fullname', 'email', 'phone_number', 'status', 'group', 'avatar', 'password1', 'password2', 'is_active', 'is_staff', 'is_superuser')}
         ),
     )
 

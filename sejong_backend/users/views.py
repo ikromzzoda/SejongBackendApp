@@ -21,26 +21,26 @@ def check_token(request):
     return user
 
 
-@csrf_exempt
-def login_view(request):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body.decode("utf-8"))  # Декодируем и парсим JSON
-            username = data['username'] if 'username' in data else None
-            password = data['password'] if 'password' in data else None
-            if (not username) or (not password):
-                return JsonResponse({'error': 'Please send correct data'})
+# @csrf_exempt
+# def login_view(request):
+#     if request.method == "POST":
+#         try:
+#             data = json.loads(request.body.decode("utf-8"))  # Декодируем и парсим JSON
+#             username = data['username'] if 'username' in data else None
+#             password = data['password'] if 'password' in data else None
+#             if (not username) or (not password):
+#                 return JsonResponse({'error': 'Please send correct data'})
 
-            user = authenticate(request, username = username, password = password)
-            if user:
-                token = Token.objects.get(user=user)
-                return JsonResponse({"token": token.key})
+#             user = authenticate(request, username = username, password = password)
+#             if user:
+#                 token = Token.objects.get(user=user)
+#                 return JsonResponse({"token": token.key})
                 
-            else:
-                return JsonResponse({"error": "user not found"})
-        except Exception as e:
-            return JsonResponse({"ERROR": str(e)})
-    return JsonResponse({"message": "Only POST requests are allowed"})
+#             else:
+#                 return JsonResponse({"error": "user not found"}) 
+#         except Exception as e:
+#             return JsonResponse({"ERROR": str(e)})
+#     return JsonResponse({"message": "Only POST requests are allowed"})
 
 
 def get_profile_info(request):
@@ -57,7 +57,8 @@ def get_profile_info(request):
                 "status": token.status,
                 "groups": token.get_groups(),
         })            
-            
+
+
 
 
 @csrf_exempt

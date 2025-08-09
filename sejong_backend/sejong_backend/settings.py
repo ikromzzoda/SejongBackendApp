@@ -10,6 +10,10 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
+# Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+# PS C:\Users\AI\Desktop\Sejong Backend and Admin Panel> .\venv\Scripts\activate
+
 import django_mongodb_backend
 
 from pathlib import Path
@@ -25,7 +29,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = '1u695jxow=#k$d5e_bd$(x%2glm)z*s5h^0tt6nrgvy#8bo^jc'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -43,15 +47,33 @@ INSTALLED_APPS = [
     'elibrary',
     'info',
     'gdstorage',
+    'rest_framework',
     'rest_framework.authtoken',
+    'djoser',
+    # 'rest_framework_simplejwt',
 ]
 
 
+from datetime import timedelta
+
 REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ],
+
+    # 'DEFAULT_PERMISSION_CLASSES': [
+    #     'rest_framework.permissions.AllowAny',
+    # ],
+
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ]
 }
+
+
 
 
 MIDDLEWARE = [
@@ -133,7 +155,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.1/ref/settings/#default-auto-field

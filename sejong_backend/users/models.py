@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.db import models
 from django.utils import timezone
+from datetime import timedelta
 from django.core.validators import RegexValidator
 from gdstorage.storage import GoogleDriveStorage
 import re
@@ -62,7 +63,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     group = models.ManyToManyField("Groups", related_name="user_set", blank=True)  
     avatar = models.ImageField(upload_to="Sejong Cloud/users/avatars", storage=gd_storage, blank=True) 
     date_joined = models.DateTimeField(default=timezone.now)
-    avatar_id = models.CharField(max_length=250, blank=True, null=True, help_text="<strong><span style='font-size: 16px;'>Don't touch!!!</span></strong>")
+    avatar_id = models.CharField(max_length=250, blank=True, null=True, ) #help_text="<strong><span style='font-size: 16px;'>Don't touch!!!</span></strong>"
 
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
@@ -119,7 +120,8 @@ class Groups(models.Model):
     def __str__(self):
         return self.name
 
-@receiver(post_save, sender=settings.AUTH_USER_MODEL)
-def create_auth_token(sender, instance=None, created=False, **kwargs):
-    if created:
-        Token.objects.create(user=instance)
+# @receiver(post_save, sender=settings.AUTH_USER_MODEL)
+# def create_auth_token(sender, instance=None, created=False, **kwargs):
+#     if created:
+#         Token.objects.create(user=instance)
+    
