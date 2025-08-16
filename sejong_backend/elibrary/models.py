@@ -39,8 +39,9 @@ class Book(models.Model):
         if self.file:
             file_url = self.file.storage.url(self.file.name)
             match_file = re.search(r'id=([^&]+)', file_url)
-            self.file_id = f'https://drive.google.com/thumbnail?id={match_file.group(1)}' if match_file else None    
-            super().save(update_fields = ['file_id'])  
+            # Прямая ссылка для скачивания
+            self.file_id = f'https://drive.google.com/uc?export=download&id={match_file.group(1)}' if match_file else None
+            super().save(update_fields=['file_id']) 
 
     def __str__(self):
         return self.title

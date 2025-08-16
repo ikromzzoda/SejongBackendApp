@@ -9,6 +9,7 @@ class ScheduleAdmin(admin.ModelAdmin):
     list_display = ('group_name', 'teacher')
     search_fields = ('group_name', 'teacher')
     list_filter = ('group', 'teacher', 'book')
+    ordering = ('group',)
     
 
 @admin.register(Announcement)
