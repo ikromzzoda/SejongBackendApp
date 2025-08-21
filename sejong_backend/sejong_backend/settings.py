@@ -1,3 +1,4 @@
+# ikromi@raspberrypi:/projects/SejongBackendApp $ source venv/bin/activate
 """
 Django settings for sejong_backend project.
 
@@ -172,3 +173,7 @@ AUTH_USER_MODEL = 'users.User'
 
 GOOGLE_DRIVE_STORAGE_JSON_KEY_FILE = 'sejong-cloud-ff73493133e6.json'
 # GOOGLE_DRIVE_STORAGE_MEDIA_ROOT = '<base google drive path for file uploads>' # OPTIONAL
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://sejong-backend.serveo.net',  # Replace with your Serveo URL
+]

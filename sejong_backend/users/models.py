@@ -59,6 +59,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     fullname = models.CharField(max_length=200, blank=False)
     email = models.EmailField(unique=True)
     phone_number = models.CharField(max_length=13, validators=[phone_validator], blank=False)
+    date_of_birth = models.DateField(blank=False, null=False)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Student')
     group = models.ManyToManyField("Groups", related_name="user_set", blank=True)  
     avatar = models.ImageField(upload_to="Sejong Cloud/users/avatars", storage=gd_storage, blank=True) 

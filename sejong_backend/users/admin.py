@@ -4,6 +4,8 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import User, Groups
 from .forms import UserAdminForm
 
+admin.site.site_header = "Sejong administration"
+admin.site.index_title = "King Sejong Institute Dushanbe 3"
 admin.site.unregister(Group)
 
 class UserAdmin(BaseUserAdmin):
@@ -17,7 +19,7 @@ class UserAdmin(BaseUserAdmin):
 
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
-        ('Personal info', {'fields': ('fullname', 'email', 'phone_number', 'status', 'group', 'avatar')}),
+        ('Personal info', {'fields': ('fullname', 'email', 'phone_number', 'date_of_birth', 'status', 'group', 'avatar')}),
         ('Permissions', {'fields': ('is_active', 'is_superuser', 'is_staff')}),
         ('Important dates', {'fields': ('last_login', 'date_joined', 'avatar_id')}),
     )
@@ -25,7 +27,7 @@ class UserAdmin(BaseUserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('username', 'fullname', 'email', 'phone_number', 'status', 'group', 'avatar', 'password1', 'password2', 'is_active', 'is_staff', 'is_superuser')}
+            'fields': ('username', 'fullname', 'email', 'phone_number', 'date_of_birth', 'status', 'group', 'avatar', 'password1', 'password2', 'is_active', 'is_staff', 'is_superuser')}
         ),
     )
 
