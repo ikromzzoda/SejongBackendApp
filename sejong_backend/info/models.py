@@ -99,8 +99,17 @@ class Announcement(models.Model):
     Model for storing announcements (Django relational model)
     """
     custom_id = models.IntegerField(unique = True, blank = True, null = True,) #help_text="<strong><span style='font-size: 16px;'>Don't touch!!!</span></strong>"
-    title = models.CharField(max_length=200, blank=False, help_text="Announcement title")
-    content = models.TextField(blank=False, help_text="Announcement content")
+
+    title_taj = models.CharField(max_length=200, blank=False, help_text="Announcement title Tajik", default="")
+    title_rus = models.CharField(max_length=200, blank=False, help_text="Announcement title Russian", default="")
+    title_eng = models.CharField(max_length=200, blank=False, help_text="Announcement title English", default="")
+    title_kor = models.CharField(max_length=200, blank=False, help_text="Announcement title Korean", default="")
+
+    content_taj = models.TextField(blank=False, help_text="Announcement content in Tajik", default="")
+    content_rus = models.TextField(blank=False, help_text="Announcement content in Russian", default="")
+    content_eng = models.TextField(blank=False, help_text="Announcement content in English", default="")
+    content_kor = models.TextField(blank=False, help_text="Announcement content in Korean", default="")
+
     images_many_to_many = models.ManyToManyField(AnnouncementImage, blank=True, help_text="Images related to the announcement")
     images = models.JSONField(blank=True, null=True,) #help_text="<strong><span style='font-size: 16px;'>Don't touch!!!</span></strong>"
     time_posted = models.DateTimeField(auto_now_add=True, help_text="Date of announcement")
@@ -111,7 +120,7 @@ class Announcement(models.Model):
         db_table = 'announcements'
 
     def __str__(self):
-        return self.title
+        return self.title_eng
     
     def save(self, *args, **kwargs):
         if self.custom_id is None:

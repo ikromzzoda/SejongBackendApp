@@ -91,7 +91,7 @@ def change_info(request):
                 data = json.loads(request.body.decode("UTF-8"))
                 username = data.get("username")
                 password = data.get("password")
-                phone_number = data.get("phone_number")
+                # phone_number = data.get("phone_number")
                 email = data.get("email")
                 # avatar = data.get("avatar")
                 
@@ -101,9 +101,8 @@ def change_info(request):
                 if password:
                     token.set_password(password)
                 
-                if phone_number:
-                    token.phone_number = phone_number
-                    print(phone_number)
+                # if phone_number:
+                #     token.phone_number = phone_number
                 
                 if email:
                     token.email = email
@@ -112,7 +111,7 @@ def change_info(request):
                 #     change_avatar(avatar)
 
                 token.save()
-                return JsonResponse({ "message": f"Success, data: {token}" })
+                return JsonResponse({ "message": f"Success, data: {token}", "auth_token": token })
             
             except Exception as e:
                 return JsonResponse({"ERROR": str(e)})

@@ -16,9 +16,9 @@ class ScheduleAdmin(admin.ModelAdmin):
 class AnnouncementAdmin(admin.ModelAdmin):
     readonly_fields = ('custom_id', 'images',)
 
-    list_display = ('title', 'author', 'time_posted')
-    search_fields = ('title',)
-    list_filter = ('title', 'time_posted')
+    list_display = ('title_eng', 'author', 'time_posted')
+    search_fields = ('title_eng',)
+    list_filter = ('title_eng', 'time_posted')
 
 
 @admin.register(TimeSlot)
