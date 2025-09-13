@@ -82,39 +82,95 @@ def change_avatar(request):
     return JsonResponse({"error": "Only POST requests are allowed"})                
 
 
+
 @csrf_exempt
 def change_info(request):
     if request.method == "POST":
-        token = check_token(request)
-        if token:
+        user = check_token(request)
+        if isinstance(user, User):
             try:
+                auth_token = request.headers.get("token")
                 data = json.loads(request.body.decode("UTF-8"))
                 username = data.get("username")
+                check_password = data.get("check_password")
                 password = data.get("password")
-                # phone_number = data.get("phone_number")
+                phone_number = data.get("phone_number")
                 email = data.get("email")
                 # avatar = data.get("avatar")
                 
                 if username:
-                    token.username = username
+                    user.username = username
                 
-                if password:
-                    token.set_password(password)
+                if user.check_password(check_password):  # проверяем текущий пароль
+                    if password:  # если есть новый пароль
+                        user.set_password(password)  # Django сам захэширует
+                else:
+                    return JsonResponse(
+                        {"message": "Password incorrect, please write the correct current password"},
+                        status=400
+                    )
                 
-                # if phone_number:
-                #     token.phone_number = phone_number
+                if phone_number:
+                    user.phone_number = phone_number
+                    print(phone_number)
                 
                 if email:
-                    token.email = email
+                    user.email = email
                 
                 # if avatar:
                 #     change_avatar(avatar)
 
-                token.save()
-                return JsonResponse({ "message": f"Success, data: {token}", "auth_token": token })
+                user.save()
+                return JsonResponse({
+                    "message": "Success",
+                    "auth_token": auth_token,
+                    "user_data": {
+                        "username": user.username,
+                        "fullname": user.fullname,
+                        "phone_number": user.phone_number,
+                        "email": user.email,
+                    },
+                })
             
             except Exception as e:
                 return JsonResponse({"ERROR": str(e)})
+        else:
+            return user
+
+
+# @csrf_exempt
+# def change_info(request):
+#     if request.method == "POST":
+#         token = check_token(request)
+#         if token:
+#             try:
+#                 data = json.loads(request.body.decode("UTF-8"))
+#                 username = data.get("username")
+#                 password = data.get("password")
+#                 # phone_number = data.get("phone_number")
+#                 email = data.get("email")
+#                 # avatar = data.get("avatar")
+                
+#                 if username:
+#                     token.username = username
+                
+#                 if password:
+#                     token.set_password(password)
+                
+#                 # if phone_number:
+#                 #     token.phone_number = phone_number
+                
+#                 if email:
+#                     token.email = email
+                
+#                 # if avatar:
+#                 #     change_avatar(avatar)
+
+#                 token.save()
+#                 return JsonResponse({ "message": f"Success, data: {token}", "auth_token": token })
+            
+#             except Exception as e:
+#                 return JsonResponse({"ERROR": str(e)})
 
 
 
