@@ -21,41 +21,22 @@ def check_token(request):
     return user
 
 
-# @csrf_exempt
-# def login_view(request):
-#     if request.method == "POST":
-#         try:
-#             data = json.loads(request.body.decode("utf-8"))  # Декодируем и парсим JSON
-#             username = data['username'] if 'username' in data else None
-#             password = data['password'] if 'password' in data else None
-#             if (not username) or (not password):
-#                 return JsonResponse({'error': 'Please send correct data'})
-
-#             user = authenticate(request, username = username, password = password)
-#             if user:
-#                 token = Token.objects.get(user=user)
-#                 return JsonResponse({"token": token.key})
-                
-#             else:
-#                 return JsonResponse({"error": "user not found"}) 
-#         except Exception as e:
-#             return JsonResponse({"ERROR": str(e)})
-#     return JsonResponse({"message": "Only POST requests are allowed"})
-
-
 def get_profile_info(request):
     if request.method == "GET":
-        token = check_token(request)
+        # Проверяем токен
+        user = check_token(request)
+        if isinstance(user, JsonResponse):
+            return user  # Возвращаем ошибку, если токен неверный
 
-        if token:
+        else:
             return JsonResponse ({
-                "username": token.username,
-                "avatar": token.avatar_id,
-                "fullname": token.fullname,
+                "username": user.username,
+                "avatar": user.avatar_id,
+                "fullname": user.fullname,
                 # "number": token.phone_number,
-                "email": token.email,
-                "status": token.status,
-                "groups": token.get_groups(),
+                "email": user.email,
+                "status": user.status,
+                "groups": user.get_groups(),
         })            
 
 
@@ -64,8 +45,12 @@ def get_profile_info(request):
 @csrf_exempt
 def change_avatar(request):
     if request.method == "POST":
-        token = check_token(request)
-        if token:
+        # Проверяем токен
+        user = check_token(request)
+        if isinstance(user, JsonResponse):
+            return user  # Возвращаем ошибку, если токен неверный
+        
+        else:
             try:
                 data = json.loads(request.body.decode("UTF-8"))
                 new_avatar = data.get("new_avatar")
@@ -73,8 +58,8 @@ def change_avatar(request):
                 if not new_avatar:
                     return JsonResponse({"message": "Avatar is required"}, status=400)
                 
-                token.avatar = new_avatar
-                token.save()
+                user.avatar = new_avatar
+                user.save()
             
             except Exception as e:
                 return JsonResponse({"ERROR": str(e)})
@@ -87,6 +72,7 @@ def change_avatar(request):
 def change_info(request):
     if request.method == "POST":
         user = check_token(request)
+        
         if isinstance(user, User):
             try:
                 auth_token = request.headers.get("token")
@@ -112,7 +98,6 @@ def change_info(request):
                 
                 if phone_number:
                     user.phone_number = phone_number
-                    print(phone_number)
                 
                 if email:
                     user.email = email
@@ -136,6 +121,31 @@ def change_info(request):
                 return JsonResponse({"ERROR": str(e)})
         else:
             return user
+
+
+
+# @csrf_exempt
+# def login_view(request):
+#     if request.method == "POST":
+#         try:
+#             data = json.loads(request.body.decode("utf-8"))  # Декодируем и парсим JSON
+#             username = data['username'] if 'username' in data else None
+#             password = data['password'] if 'password' in data else None
+#             if (not username) or (not password):
+#                 return JsonResponse({'error': 'Please send correct data'})
+
+#             user = authenticate(request, username = username, password = password)
+#             if user:
+#                 token = Token.objects.get(user=user)
+#                 return JsonResponse({"token": token.key})
+                
+#             else:
+#                 return JsonResponse({"error": "user not found"}) 
+#         except Exception as e:
+#             return JsonResponse({"ERROR": str(e)})
+#     return JsonResponse({"message": "Only POST requests are allowed"})
+
+
 
 
 # @csrf_exempt

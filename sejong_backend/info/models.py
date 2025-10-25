@@ -120,7 +120,8 @@ class Announcement(models.Model):
         db_table = 'announcements'
 
     def __str__(self):
-        return self.title_eng
+        return f"TJ: {self.title_taj} | RU: {self.title_rus} | EN: {self.title_eng} | KR: {self.title_kor}"
+
     
     def save(self, *args, **kwargs):
         if self.custom_id is None:
