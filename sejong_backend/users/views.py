@@ -85,11 +85,20 @@ def change_info(request):
                 # avatar = data.get("avatar")
                 
                 if username:
-                    user.username = username
+                    if User.objects.filter(username=username).exists(): #Если существует такой же никнейм
+                        return JsonResponse(
+                            {"message": "This username is already taken. Please choose another username"},
+                            status=400
+                        )
+                    else:
+                        user.username = username
+                        return JsonResponse({"username": user.username})
+                       
                 
                 if user.check_password(check_password):  # проверяем текущий пароль
                     if password:  # если есть новый пароль
                         user.set_password(password)  # Django сам захэширует
+                        return JsonResponse({"password": user.password})
                 else:
                     return JsonResponse(
                         {"message": "Password incorrect, please write the correct current password"},
@@ -98,9 +107,11 @@ def change_info(request):
                 
                 if phone_number:
                     user.phone_number = phone_number
+                    return JsonResponse({"phone_number": user.phone_number})
                 
                 if email:
                     user.email = email
+                    return JsonResponse({"email": user.email})
                 
                 # if avatar:
                 #     change_avatar(avatar)
