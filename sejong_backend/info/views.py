@@ -17,13 +17,12 @@ def check_token(request):
 
 def get_schedules(request):
     if request.method == "GET":
-        # 1️⃣ Проверяем токен
         user = check_token(request)
         # Если функция вернула JsonResponse (ошибка), просто возвращаем её
         if isinstance(user, JsonResponse):
             return user
 
-        # 2️⃣ Получаем расписания
+        # Получаем расписания
         schedules = Schedule.objects.all()
         data = []
 
@@ -35,14 +34,12 @@ def get_schedules(request):
                 "time": schedule.time if schedule.time else [],
             })
 
-        # 3️⃣ Возвращаем ответ
         return JsonResponse(data, safe=False)
 
 
 
 def get_all_announcements(request):
     if request.method == "GET":
-        # Проверяем токен
         user = check_token(request)
         if isinstance(user, JsonResponse):
             return user  # Возвращаем ошибку, если токен неверный

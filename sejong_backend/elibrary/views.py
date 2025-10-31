@@ -18,7 +18,6 @@ def check_token(request):
 
 def get_all_books(request):
     if request.method == "GET":
-        # Проверяем токен
         user = check_token(request)
         if isinstance(user, JsonResponse):
             return user  # Возвращаем ошибку, если токен неверный

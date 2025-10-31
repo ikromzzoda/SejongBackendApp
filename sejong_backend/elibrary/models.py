@@ -20,8 +20,8 @@ class Book(models.Model):
     published_date = models.DateField(verbose_name="Date of publication", blank=True, null=True)
     created_at = models.DateTimeField(default=timezone.now)
 
-    cover_id = models.CharField(max_length=250, blank=True, null=True,) #help_text="<strong><span style='font-size: 16px;'>Don't touch!!!</span></strong>"
-    file_id = models.CharField(max_length=250, blank=True, null=True,) #help_text="<strong><span style='font-size: 16px;'>Don't touch!!!</span></strong>"
+    cover_id = models.CharField(max_length=250, blank=True, null=True,) 
+    file_id = models.CharField(max_length=250, blank=True, null=True,) 
 
     class Meta:
         db_table = 'elibrary'
@@ -33,6 +33,7 @@ class Book(models.Model):
         if self.cover:
             cover_url = self.cover.storage.url(self.cover.name)
             match_cover = re.search(r'id=([^&]+)', cover_url)
+            # Прямая ссылка для скачивания
             self.cover_id = f'https://drive.google.com/thumbnail?id={match_cover.group(1)}' if match_cover else None
             super().save(update_fields = ['cover_id'])
         

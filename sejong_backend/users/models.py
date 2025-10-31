@@ -1,15 +1,10 @@
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.db import models
 from django.utils import timezone
-from datetime import timedelta
 from django.core.validators import RegexValidator
 from gdstorage.storage import GoogleDriveStorage
 import re
 from django.utils.html import format_html
-from django.conf import settings
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from rest_framework.authtoken.models import Token
 
 gd_storage = GoogleDriveStorage()
 
@@ -104,8 +99,8 @@ class Groups(models.Model):
     
     user_count.short_description = "Count of Participants"
 
-    def participant_names(self):
-        return [user.fullname for user in self.user_set.all()]
+    # def participant_names(self):
+    #     return [user.fullname for user in self.user_set.all()]
     
     def participant_names_admin(self):
         return format_html("<br>".join(user.fullname for user in self.user_set.all()))

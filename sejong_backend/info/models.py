@@ -1,5 +1,4 @@
 import re
-from datetime import time
 from django.db import models
 from django.db import transaction
 from django.dispatch import receiver
@@ -56,7 +55,7 @@ class Schedule(models.Model):
         blank=False,
         help_text="Time slots for the schedule"
     )
-    time = models.JSONField(blank=True, null=True,) #help_text="<strong><span style='font-size: 16px;'>Don't touch!!!</span></strong>"
+    time = models.JSONField(blank=True, null=True,)
 
     teacher = models.CharField(max_length=100, blank=False, help_text="Teacher name")
     book = models.IntegerField(
@@ -77,7 +76,7 @@ class Schedule(models.Model):
 class AnnouncementImage(models.Model):
     title = models.CharField(max_length=200, blank=False, help_text="Image title")
     image = models.ImageField(upload_to='Sejong Cloud/announcement/images', storage=gd_storage, blank=True, help_text="Image file")
-    google_drive_file_id = models.CharField(max_length = 100, blank = True, null = True,) #help_text="<strong><span style='font-size: 16px;'>Don't touch!!!</span></strong>"
+    google_drive_file_id = models.CharField(max_length = 100, blank = True, null = True,)
 
 
     def __str__(self):
@@ -98,7 +97,7 @@ class Announcement(models.Model):
     """
     Model for storing announcements (Django relational model)
     """
-    custom_id = models.IntegerField(unique = True, blank = True, null = True,) #help_text="<strong><span style='font-size: 16px;'>Don't touch!!!</span></strong>"
+    custom_id = models.IntegerField(unique = True, blank = True, null = True,)
 
     title_taj = models.CharField(max_length=200, blank=False, help_text="Announcement title Tajik", default="")
     title_rus = models.CharField(max_length=200, blank=False, help_text="Announcement title Russian", default="")
@@ -111,7 +110,7 @@ class Announcement(models.Model):
     content_kor = models.TextField(blank=False, help_text="Announcement content in Korean", default="")
 
     images_many_to_many = models.ManyToManyField(AnnouncementImage, blank=True, help_text="Images related to the announcement")
-    images = models.JSONField(blank=True, null=True,) #help_text="<strong><span style='font-size: 16px;'>Don't touch!!!</span></strong>"
+    images = models.JSONField(blank=True, null=True,)
     time_posted = models.DateTimeField(auto_now_add=True, help_text="Date of announcement")
     author = models.CharField(max_length=100, blank=False, help_text="Author of the announcement")
     is_active = models.BooleanField(default=True, help_text="Is the announcement active?")
