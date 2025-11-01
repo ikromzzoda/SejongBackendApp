@@ -117,7 +117,7 @@ def change_info(request):
                  # обновляем токен
                 Token.objects.filter(user=user).delete()
                 new_token, created = Token.objects.get_or_create(user=user)
-                response_data["token"] = new_token.key
+                response_data["auth_token"] = new_token.key
           
         if phone_number:
             try:
