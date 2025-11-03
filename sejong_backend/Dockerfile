@@ -1,20 +1,25 @@
-# Use an official Python runtime as a parent image
-FROM python:3.9
+# Use the official Python image
+FROM python:3.12.4-slim
 
-# Set the working directory in the container
+# Prevent .pyc files and ensure logs show immediately
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+# Set the working directory
 WORKDIR /app
 
-# Copy the dependencies file to the working directory
-COPY requirements.txt .
-
-# Install any needed packages specified in requirements.txt
+# Copy and install dependencies
+COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the content of the local src directory to the working directory
-COPY . .
+# Copy project files
+COPY . /app/
 
-# Expose the port the app runs on
-EXPOSE 8000
+# Collect static files
+RUN python manage.py collectstatic --noinput
 
-# Command to run the application
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "sejong_backend.wsgi"]
+# Expose Cloud Run port
+EXPOSE 8080
+
+# Start Gunicorn using the Cloud Run PORT env var
+CMD exec gunicorn --bind 0.0.0.0:${PORT:-8080} --workers 1 --threads 8 --timeout 0 sejong_backend.wsgi:application
