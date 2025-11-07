@@ -59,7 +59,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     group = models.ManyToManyField("Groups", related_name="user_set", blank=True)  
     avatar = models.ImageField(upload_to="Sejong Cloud/users/avatars", storage=gd_storage, blank=True) 
     date_joined = models.DateTimeField(default=timezone.now)
-    avatar_id = models.CharField(max_length=250, blank=True, null=True, ) #help_text="<strong><span style='font-size: 16px;'>Don't touch!!!</span></strong>"
+    avatar_id = models.CharField(max_length=250, blank=True, null=True, default="https://drive.google.com/file/d/1vwR-0IPCf2LpL2e8EsTfR9zxi5gbZCH0/view?usp=sharing") #help_text="<strong><span style='font-size: 16px;'>Don't touch!!!</span></strong>"
 
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)

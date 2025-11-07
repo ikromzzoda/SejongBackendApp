@@ -5,6 +5,9 @@ import json
 from rest_framework.authtoken.models import Token
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
+from gdstorage.storage import GoogleDriveStorage
+
+gd_storage = GoogleDriveStorage()
 
 
 def check_token(request):
@@ -41,31 +44,81 @@ def get_profile_info(request):
 
 
 
+# @csrf_exempt
+# def change_avatar(request):
+#     if request.method == "POST":
+#         # Проверяем токен
+#         user = check_token(request)
+#         if isinstance(user, JsonResponse):
+#             return user  # Ошибка авторизации
 
-@csrf_exempt
-def change_avatar(request):
-    if request.method == "POST":
-        # Проверяем токен
-        user = check_token(request)
-        if isinstance(user, JsonResponse):
-            return user  # Возвращаем ошибку, если токен неверный
-        
-        else:
-            try:
-                data = json.loads(request.body.decode("UTF-8"))
-                new_avatar = data.get("new_avatar")
+#         try:
+#             # Получаем файл из form-data
+#             new_avatar = request.FILES.get("new_avatar")
 
-                if not new_avatar:
-                    return JsonResponse({"message": "Avatar is required"}, status=400)
-                
-                user.avatar = new_avatar
-                user.save()
+#             if not new_avatar:
+#                 return JsonResponse({"message": "Avatar file is required"}, status=400)
+
+#             # Удаляем старый аватар, если есть
+#             if user.avatar:
+#                 new_avatar = models.ImageField(upload_to="Sejong Cloud/users/avatars", storage=gd_storage, blank=True)
+#                 avatar_id = models.CharField(max_length=250)
             
-            except Exception as e:
-                return JsonResponse({"ERROR": str(e)})
-        
-    return JsonResponse({"error": "Only POST requests are allowed"})                
+#             def save(self, *args, **kwargs):
+#                 super().save(*args, **kwargs)
 
+#                 if new_avatar:
+#                     avatar_url = new_avatar.storage.url(new_avatar.name)
+#                     match_avatar = re.search(r'id=([^&]+)', avatar_url)
+#                     avatar_id = f'https://drive.google.com/thumbnail?id={match_avatar.group(1)}' if match_avatar else None
+#                     super().save(update_fields = ['avatar_id'])
+
+#                 # Отдаём ссылку на аватар
+#                 return JsonResponse({
+#                     "message": "Avatar updated successfully",
+#                     "avatar_url": user.avatar.url
+#                 })
+#         except Exception as e:
+#             return JsonResponse({"ERROR": str(e)}, status=500)
+
+#     return JsonResponse({"error": "Only POST requests are allowed"}, status=405)    
+
+
+# @csrf_exempt
+# def change_avatar(request):
+#     if request.method != "POST":
+#         return JsonResponse({"error": "Only POST requests are allowed"}, status=405)
+
+#     # Проверяем токен
+#     #user = check_token(request)
+#     # if isinstance(user, JsonResponse):
+#     #     return user  # Ошибка авторизации
+
+#     try:
+#         # Получаем файл из form-data
+#         new_avatar = request.FILES.get("new_avatar")
+#         if not new_avatar:
+#             return JsonResponse({"message": "Avatar file is required"}, status=400)
+
+#         # if new_avatar:
+#         #     try:
+#         #         user.avatar.delete(save=False)
+#         #     except Exception:
+#         #         pass
+
+#         # Сохраняем новый аватар
+#         new_avatar.save(new_avatar.name, new_avatar, save=True)
+
+#         # После сохранения автоматически сработает метод save() из модели,
+#         # который обновит avatar_id через регулярное выражение
+#         return JsonResponse({
+#             "message": "Avatar updated successfully",
+#             "avatar_url": new_avatar.avatar.url,
+#             "avatar_id": new_avatar.avatar_id
+#         })
+
+#     except Exception as e:
+#         return JsonResponse({"error": str(e)}, status=500)
 
 
 @csrf_exempt

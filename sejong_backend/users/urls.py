@@ -12,7 +12,8 @@ urlpatterns = [
     # path('avatar/', views.change_avatar, name='change_avatar'),
     
     
-    path('change_info/', views.change_info, name='change_info'),    
+    path('change_info/', views.change_info, name='change_info'),  
+    path('change_avatar/', views.change_info, name='change_avatar'),   
     # path('groups/', views.get_user_groups, name='get_user_groups'),
     # path('change_username/', views.change_username, name='change_username'),
     # path('change_password/', views.change_password, name='change_password'),
