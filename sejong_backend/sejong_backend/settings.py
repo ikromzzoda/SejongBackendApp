@@ -15,7 +15,10 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 
 # PS C:\Users\AI\Desktop\Sejong Backend and Admin Panel> .\venv\Scripts\activate
 
+import os
 import django_mongodb_backend
+from django.conf import settings
+from django.conf.urls.static import static
 
 from pathlib import Path
 
@@ -30,7 +33,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = '1u695jxow=#k$d5e_bd$(x%2glm)z*s5h^0tt6nrgvy#8bo^jc'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -43,7 +46,6 @@ INSTALLED_APPS = [
     'sejong_backend.apps.MongoContentTypesConfig',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
     'users',
     'elibrary',
@@ -52,8 +54,11 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'djoser',
+    # 'rest_framework_simplejwt',
 ]
 
+
+from datetime import timedelta
 
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
@@ -156,8 +161,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.1/ref/settings/#default-auto-field

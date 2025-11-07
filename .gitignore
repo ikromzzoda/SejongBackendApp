@@ -12,7 +12,7 @@ __pycache__/
 # Virtual environment
 venc/
 env/
-venv/
+sejong_backend/venv/
 
 # Django
 *.sqlite3

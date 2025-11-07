@@ -1,19 +1,33 @@
-Django==5.1.8
-djangorestframework==3.16.0
+# Django and REST
+Django
+djangorestframework
+
+# WSGI server
 gunicorn
-psycopg2==2.9.10
-django-filter==25.1
-django-crispy-forms==2.3
-crispy-bootstrap4==2024.10
-django-googledrive-storage==1.6.0
-django-mongodb-backend==5.1.0b1
-djongo==1.3.7
-pymongo==4.12.0
-mysqlclient==2.2.7
+
+# Forms
+django-crispy-forms
+crispy-bootstrap4
+
+# Filtering
+django-filter
+
+# Google Drive storage
+django-googledrive-storage
+google-auth              # keeps django-googledrive-storage happy
+google-auth-httplib2
+google-auth-oauthlib  # compatible with google-auth<2
+google-api-python-client
+
+# MongoDB backend
+django-mongodb-backend
+djongo
+pymongo
+
+# Auth
+djoser
+
+# Environment & utilities
 python-dotenv
-requests==2.32.3
-google-api-python-client==2.169.0
-google-auth==2.39.0
-google-auth-httplib2==0.2.0
-google-auth-oauthlib==1.2.2
+requests
 whitenoise
