@@ -90,7 +90,7 @@ class AnnouncementImage(models.Model):
         # Extract the file ID from the URL
         match = re.search(r'id=([^&]+)', file_url)
 
-        self.google_drive_file_id = f'https://drive.google.com/thumbnail?id={match.group(1)}' if match else None
+        self.google_drive_file_id = f'https://drive.google.com/uc?id={match.group(1)}' if match else None
         super().save(update_fields = ['google_drive_file_id'])
 
 class Announcement(models.Model):

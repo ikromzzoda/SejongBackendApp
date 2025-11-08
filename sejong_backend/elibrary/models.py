@@ -34,7 +34,7 @@ class Book(models.Model):
             cover_url = self.cover.storage.url(self.cover.name)
             match_cover = re.search(r'id=([^&]+)', cover_url)
             # Прямая ссылка для скачивания
-            self.cover_id = f'https://drive.google.com/thumbnail?id={match_cover.group(1)}' if match_cover else None
+            self.cover_id =f'https://drive.google.com/uc?id={match_cover.group(1)}' if match_cover else None
             super().save(update_fields = ['cover_id'])
         
         if self.file:
