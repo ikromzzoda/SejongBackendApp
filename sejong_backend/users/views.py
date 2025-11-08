@@ -6,6 +6,8 @@ from rest_framework.authtoken.models import Token
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from gdstorage.storage import GoogleDriveStorage
+from django.core.files.base import ContentFile
+import uuid
 
 gd_storage = GoogleDriveStorage()
 
@@ -43,82 +45,45 @@ def get_profile_info(request):
         })            
 
 
+@csrf_exempt
+def change_avatar(request):
+    if request.method == "POST":
+        # Проверяем токен
+        user = check_token(request)
+        if isinstance(user, JsonResponse):
+            return user  # Возвращаем ошибку, если токен неверный
+        
+        else:
+            try:
 
-# @csrf_exempt
-# def change_avatar(request):
-#     if request.method == "POST":
-#         # Проверяем токен
-#         user = check_token(request)
-#         if isinstance(user, JsonResponse):
-#             return user  # Ошибка авторизации
+                new_avatar_file = request.body
 
-#         try:
-#             # Получаем файл из form-data
-#             new_avatar = request.FILES.get("new_avatar")
+                if not new_avatar_file:
+                    return JsonResponse({"error": "No avatar file provided"}, status=400)
+                
+                content_type = request.META.get('CONTENT_TYPE', 'application/octet-stream')
+                
+                extension_map = {
+                    'image/jpeg': '.jpg',
+                    'image/png': '.png',
+                    'image/gif': '.gif',
+                    'application/oct-stream': '.bin',
+                }
+                file_extension = extension_map.get(content_type, '.bin')
 
-#             if not new_avatar:
-#                 return JsonResponse({"message": "Avatar file is required"}, status=400)
+                filename = f"avatar_{uuid.uuid4()}{file_extension}"
 
-#             # Удаляем старый аватар, если есть
-#             if user.avatar:
-#                 new_avatar = models.ImageField(upload_to="Sejong Cloud/users/avatars", storage=gd_storage, blank=True)
-#                 avatar_id = models.CharField(max_length=250)
+                avatar_file = ContentFile(new_avatar_file, name=filename)
+
+                user.avatar = avatar_file
+                user.save()
             
-#             def save(self, *args, **kwargs):
-#                 super().save(*args, **kwargs)
+                return JsonResponse({"message": "Avatar updated successfully", "avatar": user.avatar_id})
 
-#                 if new_avatar:
-#                     avatar_url = new_avatar.storage.url(new_avatar.name)
-#                     match_avatar = re.search(r'id=([^&]+)', avatar_url)
-#                     avatar_id = f'https://drive.google.com/thumbnail?id={match_avatar.group(1)}' if match_avatar else None
-#                     super().save(update_fields = ['avatar_id'])
-
-#                 # Отдаём ссылку на аватар
-#                 return JsonResponse({
-#                     "message": "Avatar updated successfully",
-#                     "avatar_url": user.avatar.url
-#                 })
-#         except Exception as e:
-#             return JsonResponse({"ERROR": str(e)}, status=500)
-
-#     return JsonResponse({"error": "Only POST requests are allowed"}, status=405)    
-
-
-# @csrf_exempt
-# def change_avatar(request):
-#     if request.method != "POST":
-#         return JsonResponse({"error": "Only POST requests are allowed"}, status=405)
-
-#     # Проверяем токен
-#     #user = check_token(request)
-#     # if isinstance(user, JsonResponse):
-#     #     return user  # Ошибка авторизации
-
-#     try:
-#         # Получаем файл из form-data
-#         new_avatar = request.FILES.get("new_avatar")
-#         if not new_avatar:
-#             return JsonResponse({"message": "Avatar file is required"}, status=400)
-
-#         # if new_avatar:
-#         #     try:
-#         #         user.avatar.delete(save=False)
-#         #     except Exception:
-#         #         pass
-
-#         # Сохраняем новый аватар
-#         new_avatar.save(new_avatar.name, new_avatar, save=True)
-
-#         # После сохранения автоматически сработает метод save() из модели,
-#         # который обновит avatar_id через регулярное выражение
-#         return JsonResponse({
-#             "message": "Avatar updated successfully",
-#             "avatar_url": new_avatar.avatar.url,
-#             "avatar_id": new_avatar.avatar_id
-#         })
-
-#     except Exception as e:
-#         return JsonResponse({"error": str(e)}, status=500)
+            except Exception as e:
+                return JsonResponse({"ERROR": str(e)})
+        
+    return JsonResponse({"error": "Only POST requests are allowed"})     
 
 
 @csrf_exempt
