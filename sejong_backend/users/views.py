@@ -5,6 +5,8 @@ import json
 from rest_framework.authtoken.models import Token
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
+from django.core.files.base import ContentFile
+import uuid
 
 
 def check_token(request):
@@ -52,15 +54,31 @@ def change_avatar(request):
         
         else:
             try:
-                data = json.loads(request.body.decode("UTF-8"))
-                new_avatar = data.get("new_avatar")
 
-                if not new_avatar:
-                    return JsonResponse({"message": "Avatar is required"}, status=400)
+                new_avatar_file = request.body
+
+                if not new_avatar_file:
+                    return JsonResponse({"error": "No avatar file provided"}, status=400)
                 
-                user.avatar = new_avatar
+                content_type = request.META.get('CONTENT_TYPE', 'application/octet-stream')
+                
+                extension_map = {
+                    'image/jpeg': '.jpg',
+                    'image/png': '.png',
+                    'image/gif': '.gif',
+                    'application/oct-stream': '.bin',
+                }
+                file_extension = extension_map.get(content_type, '.bin')
+
+                filename = f"avatar_{uuid.uuid4()}{file_extension}"
+
+                avatar_file = ContentFile(new_avatar_file, name=filename)
+
+                user.avatar = avatar_file
                 user.save()
             
+                return JsonResponse({"message": "Avatar updated successfully", "avatar": user.avatar_id})
+
             except Exception as e:
                 return JsonResponse({"ERROR": str(e)})
         
