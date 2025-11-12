@@ -55,8 +55,8 @@ def change_avatar(request):
         
         else:
             try:
-
                 new_avatar_file = request.body
+
 
                 if not new_avatar_file:
                     return JsonResponse({"error": "No avatar file provided"}, status=400)
