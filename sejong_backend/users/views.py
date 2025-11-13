@@ -47,43 +47,76 @@ def get_profile_info(request):
 
 @csrf_exempt
 def change_avatar(request):
-    if request.method == "POST":
-        # Проверяем токен
-        user = check_token(request)
-        if isinstance(user, JsonResponse):
-            return user  # Возвращаем ошибку, если токен неверный
+    if request.method != "POST":
+        return JsonResponse({"error": "Only POST requests are allowed"}, status=405)
+
+    user = check_token(request)
+    if isinstance(user, JsonResponse):
+        return user  # Ошибка авторизации
+
+    try:
+        # Получаем файл из form-data
+        new_avatar = request.FILES.get("new_avatar")
+        if not new_avatar:
+            return JsonResponse({"error": "No avatar file provided"}, status=400)
+
+        # Создаём новое имя для файла
+        ext = new_avatar.name.split(".")[-1]
+        filename = f"avatar_{uuid.uuid4()}.{ext}"
+
+        # Сохраняем в модель
+        user.avatar.save(filename, new_avatar)
+        user.save()
+
+        return JsonResponse({
+            "message": "Avatar updated successfully",
+            "avatar": getattr(user, "avatar_id", None)
+        })
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+# @csrf_exempt
+# def change_avatar(request):
+#     if request.method == "POST":
+
         
-        else:
-            try:
-                new_avatar_file = request.body
-
-
-                if not new_avatar_file:
-                    return JsonResponse({"error": "No avatar file provided"}, status=400)
-                
-                content_type = request.META.get('CONTENT_TYPE', 'application/octet-stream')
-                
-                extension_map = {
-                    'image/jpeg': '.jpg',
-                    'image/png': '.png',
-                    'image/gif': '.gif',
-                    'application/oct-stream': '.bin',
-                }
-                file_extension = extension_map.get(content_type, '.bin')
-
-                filename = f"avatar_{uuid.uuid4()}{file_extension}"
-
-                avatar_file = ContentFile(new_avatar_file, name=filename)
-
-                user.avatar = avatar_file
-                user.save()
-            
-                return JsonResponse({"message": "Avatar updated successfully", "avatar": user.avatar_id})
-
-            except Exception as e:
-                return JsonResponse({"ERROR": str(e)})
         
-    return JsonResponse({"error": "Only POST requests are allowed"})     
+#         # Проверяем токен
+#         user = check_token(request)
+#         if isinstance(user, JsonResponse):
+#             return user  # Возвращаем ошибку, если токен неверный
+        
+#         else:
+#             try:
+#                 new_avatar_file = request.body
+
+#                 if not new_avatar_file:
+#                     return JsonResponse({"error": "No avatar file provided"}, status=400)
+                
+#                 content_type = request.META.get('CONTENT_TYPE', 'application/octet-stream')
+                
+#                 extension_map = {
+#                     'image/jpeg': '.jpg',
+#                     'image/png': '.png',
+#                     'image/gif': '.gif',
+#                     'application/oct-stream': '.bin',
+#                 }
+#                 file_extension = extension_map.get(content_type, '.bin')
+
+#                 filename = f"avatar_{uuid.uuid4()}{file_extension}"
+
+#                 avatar_file = ContentFile(new_avatar_file, name=filename)
+
+#                 user.avatar = avatar_file
+#                 user.save()
+#                 return JsonResponse({"message": "Avatar updated successfully", "avatar": user.avatar_id})
+
+#             except Exception as e:
+#                 return JsonResponse({"ERROR": str(e)})
+        
+#     return JsonResponse({"error": "Only POST requests are allowed"})     
 
 
 @csrf_exempt
