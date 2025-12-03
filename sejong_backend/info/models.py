@@ -153,3 +153,25 @@ def get_next_id(collection_name):
     counter.current_id += 1
     counter.save()
     return counter.current_id
+
+
+class Notice(models.Model):
+    title_taj = models.CharField(max_length=200, blank=False, help_text="Notice title Tajik", default="")
+    title_rus = models.CharField(max_length=200, blank=False, help_text="Notice title Russian", default="")
+    title_eng = models.CharField(max_length=200, blank=False, help_text="Notice title English", default="")
+    title_kor = models.CharField(max_length=200, blank=False, help_text="Notice title Korean", default="")
+
+    content_taj = models.TextField(blank=False, help_text="Notice content in Tajik", default="")
+    content_rus = models.TextField(blank=False, help_text="Notice content in Russian", default="")
+    content_eng = models.TextField(blank=False, help_text="Notice content in English", default="")
+    content_kor = models.TextField(blank=False, help_text="Notice content in Korean", default="")
+
+    version_number = models.FloatField(blank=False, help_text="Version Number", default="")
+
+    #images = models.ImageField(blank=False, help_text="Image file")
+
+    class Meta:
+        db_table = 'notices'
+    
+    def __str__(self):
+        return self.title_eng or self.title_rus or self.title_taj or self.title_kor

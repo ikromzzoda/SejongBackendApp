@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from .models import Schedule, Announcement
+from .models import Schedule, Announcement, Notice
 from rest_framework.authtoken.models import Token
 
 def check_token(request):
@@ -71,7 +71,35 @@ def get_all_announcements(request):
             })
 
         return JsonResponse(data, safe=False)
+    
+def get_notices(request):
+    if request.method == "GET":
+        user = check_token(request)
+        if isinstance(user, JsonResponse):
+            return user  # Возвращаем ошибку, если токен неверный
 
+        # Получаем все объявления
+        notices = Notice.objects.all()
+        data = []
+
+        for notice in notices:
+            data.append({
+                "title": {
+                    "taj": notice.title_taj,
+                    "rus": notice.title_rus,
+                    "eng": notice.title_eng,
+                    "kor": notice.title_kor
+                },
+                "content": {
+                    "taj": notice.content_taj,
+                    "rus": notice.content_rus,
+                    "eng": notice.content_eng,
+                    "kor": notice.content_kor
+                },
+                "version": notice.version_number,
+            })
+
+        return JsonResponse(data, safe=False)
 
 
 # def get_all_announcements(request):

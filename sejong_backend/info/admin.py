@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Schedule, TimeSlot, Announcement, AnnouncementImage
+from .models import Schedule, TimeSlot, Announcement, AnnouncementImage, Notice
 
 @admin.register(Schedule)
 class ScheduleAdmin(admin.ModelAdmin):
@@ -34,3 +34,10 @@ class AnnouncementImageAdmin(admin.ModelAdmin):
     list_display = ('image',)
     search_fields = ('image',) 
     list_filter = ('image',)
+
+
+@admin.register(Notice)
+class AnnouncementAdmin(admin.ModelAdmin):
+    list_display = ('title_eng',)
+    search_fields = ('title_eng',)
+    list_filter = ('title_eng',)
