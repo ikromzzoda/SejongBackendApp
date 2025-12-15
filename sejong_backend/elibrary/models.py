@@ -11,9 +11,17 @@ class Book(models.Model):
         ('Книги Topik', 'Книги Topik'),
         ('Художественная литература', 'Художественная литература'),
     ]
-    title = models.CharField(max_length=255, verbose_name="Book Title")
+    title_taj = models.CharField(max_length=200, blank=False, verbose_name="Book title Tajik")
+    title_rus = models.CharField(max_length=200, blank=False, verbose_name="Book title Russian")
+    title_eng = models.CharField(max_length=200, blank=False, verbose_name="Book title English")
+    title_kor = models.CharField(max_length=200, blank=False, verbose_name="Book title Korean")
+
+    description_taj = models.TextField(blank=False, verbose_name="Book description in Tajik")
+    description_rus = models.TextField(blank=False, verbose_name="Book description in Russian")
+    description_eng = models.TextField(blank=False, verbose_name="Book description in English")
+    description_kor = models.TextField(blank=False, verbose_name="Book description in Korean")
+    
     author = models.CharField(max_length=255, verbose_name="Author")
-    description = models.TextField(max_length=255, verbose_name="Description", blank=True, null=True)  
     cover = models.ImageField(upload_to="Sejong Cloud/book/covers", verbose_name="Cover", storage=gd_storage, blank=True, null=True) 
     file = models.FileField(upload_to="Sejong Cloud/book/files", storage=gd_storage)  
     genres = models.CharField(max_length=30, choices=GENRES_CHOICES, blank=True)
@@ -45,4 +53,4 @@ class Book(models.Model):
             super().save(update_fields=['file_id']) 
 
     def __str__(self):
-        return self.title
+        return self.title_eng

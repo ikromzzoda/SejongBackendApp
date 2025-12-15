@@ -27,9 +27,19 @@ def get_all_books(request):
         
         for book in books:
             data.append({
-                'title': book.title,
+                "title": {
+                    "taj": book.title_taj,
+                    "rus": book.title_rus,
+                    "eng": book.title_eng,
+                    "kor": book.title_kor
+                },
+                "description": {
+                    "taj": book.description_taj,
+                    "rus": book.description_rus,
+                    "eng": book.description_eng,
+                    "kor": book.description_kor
+                },
                 'author': book.author,
-                'description': book.description,
                 'cover': book.cover_id,
                 'file': book.file_id,
                 'genres': book.genres,

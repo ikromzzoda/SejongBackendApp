@@ -166,7 +166,7 @@ class Notice(models.Model):
     content_eng = models.TextField(blank=False, help_text="Notice content in English", default="")
     content_kor = models.TextField(blank=False, help_text="Notice content in Korean", default="")
 
-    version_number = models.FloatField(blank=False, help_text="Version Number", default="")
+    version_number = models.FloatField(null=True, blank=True)
 
     #images = models.ImageField(blank=False, help_text="Image file")
 

@@ -11,20 +11,21 @@ class ScheduleAdmin(admin.ModelAdmin):
     ordering = ('group',)
     
 
+@admin.register(TimeSlot)
+class TimeSlotAdmin(admin.ModelAdmin):
+    list_display = ('day', 'start_time', 'end_time', 'classroom') 
+    search_fields = ('day', 'start_time', 'end_time', 'classroom')      
+    list_filter = ('day', 'start_time', 'end_time', 'classroom')
+    ordering = ('day', 'start_time')  
+
+
 @admin.register(Announcement)
 class AnnouncementAdmin(admin.ModelAdmin):
     readonly_fields = ('custom_id', 'images',)
 
     list_display = ('title_eng', 'author', 'time_posted')
     search_fields = ('title_eng',)
-    list_filter = ('title_eng', 'time_posted')
-
-
-@admin.register(TimeSlot)
-class TimeSlotAdmin(admin.ModelAdmin):
-    list_display = ('day', 'start_time', 'end_time', 'classroom') 
-    search_fields = ('day', 'start_time', 'end_time', 'classroom')      
-    list_filter = ('day', 'start_time', 'end_time', 'classroom')        
+    list_filter = ('title_eng', 'time_posted')      
 
 
 @admin.register(AnnouncementImage)
