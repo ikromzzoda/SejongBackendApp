@@ -96,9 +96,10 @@ def get_notices(request):
                     "eng": notice.content_eng,
                     "kor": notice.content_kor
                 },
-                "version": notice.version_number,
+                "images": [image for image in notice.image_url],
+                "version": notice.version_number
             })
-
+        
         return JsonResponse(data, safe=False)
 
 

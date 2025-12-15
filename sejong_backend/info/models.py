@@ -166,12 +166,31 @@ class Notice(models.Model):
     content_eng = models.TextField(blank=False, help_text="Notice content in English", default="")
     content_kor = models.TextField(blank=False, help_text="Notice content in Korean", default="")
 
-    version_number = models.FloatField(null=True, blank=True)
+    images = models.ImageField(
+        upload_to='Sejong Cloud/notice/images', 
+        storage=gd_storage,  # <-- сохраняем в Google Drive
+        blank=False, 
+        help_text="Image file"
+    )
+    image_url = models.JSONField(blank=True, null=True)
 
-    #images = models.ImageField(blank=False, help_text="Image file")
+    version_number = models.FloatField(blank=False, help_text="Version Number", default="")
 
     class Meta:
         db_table = 'notices'
     
     def __str__(self):
         return self.title_eng or self.title_rus or self.title_taj or self.title_kor
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        # Получаем URL файла из Google Drive
+        if self.images:
+            file_url = self.images.storage.url(self.images.name)
+
+            # Извлекаем ID файла из ссылки
+            match = re.search(r'id=([^&]+)', file_url)
+            self.image_url = [f'https://drive.google.com/uc?id={match.group(1)}'] if match else None
+
+            super().save(update_fields=['image_url'])
