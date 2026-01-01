@@ -2,6 +2,9 @@
 
 sejong-cloud-ff73493133e6.json
 
+.env
+env
+
 # Python
 *.pyc
 __pycache__/

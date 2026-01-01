@@ -2,6 +2,11 @@ from django.http import JsonResponse
 from .models import Schedule, Announcement, Notice
 from rest_framework.authtoken.models import Token
 
+import json
+from django.views.decorators.csrf import csrf_exempt
+from google import genai
+from django.conf import settings
+
 def check_token(request):
     auth_token = request.headers.get("token")
     if not auth_token:
@@ -14,6 +19,48 @@ def check_token(request):
         return JsonResponse({"error": "Invalid token"}, status=401)
 
     return user
+
+
+# Инициализация клиента Gemini
+client = genai.Client(api_key=settings.GEMINI_API_KEY)
+
+@csrf_exempt
+def ask_gemini(request):
+    if request.method == "POST":
+        user = check_token(request)
+        # Если функция вернула JsonResponse (ошибка), просто возвращаем её
+        if isinstance(user, JsonResponse):
+            return user
+    
+        try:
+            data = json.loads(request.body)
+            user_prompt = data.get("prompt", "")
+
+            if not user_prompt:
+                return JsonResponse({"error": "Prompt is empty"}, status=400)
+
+            # Инициализируем модель с системной инструкцией
+            response = client.models.generate_content(
+                model="gemini-2.0-flash",
+                config={
+                    "system_instruction": (
+                        "Ты — специализированный помощник по корейскому языку. "
+                        "Твоя задача — отвечать ТОЛЬКО на вопросы, связанные с изучением корейского языка, "
+                        "грамматикой, лексикой, культурой Кореи или переводами. "
+                        "Если пользователь задает вопрос на любую другую тему (математика, программирование, "
+                        "общие вопросы и т.д.), ты должен вежливо ответить: "
+                        "'Я отвечаю только на вопросы, связанные с корейским языком.'"
+                    )
+                },
+                contents=user_prompt
+            )
+
+            return JsonResponse({"reply": response.text})
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+        
+
 
 def get_schedules(request):
     if request.method == "GET":
