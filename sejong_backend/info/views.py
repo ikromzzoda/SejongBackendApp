@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from .models import Schedule, Announcement, Notice
 from rest_framework.authtoken.models import Token
-
+from .models import GeminiChat
 import json
 from django.views.decorators.csrf import csrf_exempt
 from google import genai
@@ -110,33 +110,70 @@ def get_notices(request):
         return JsonResponse(data, safe=False)
 
 
-# def get_all_announcements(request):
-#     if request.method == "GET":
-#         # token = check_token(request)
-#         # if token:
-#         # Assuming you have a model named AnnouncementImage with a field 'image'
-#         announcements = Announcement.objects.all()
-#         data = []
 
-#         for announcement in announcements:
-#             data.append({
-#                 "title": {
-#                     "taj": announcement.title_taj,
-#                     "rus": announcement.title_rus,
-#                     "eng": announcement.title_eng,
-#                     "kor": announcement.title_kor
-#                 },
-#                 "content": {
-#                     "taj": announcement.content_taj,
-#                     "rus": announcement.content_rus,
-#                     "eng": announcement.content_eng,
-#                     "kor": announcement.content_kor
-#                 },
-#                 "images": announcement.images,
-#                 "time_posted": announcement.time_posted.strftime("%Y-%m-%d %H:%M:%S"),
-#                 "author": announcement.author,
-#                 "is_active": announcement.is_active,
-#                 "custom_id": announcement.custom_id,
-#             })
-            
-#         return JsonResponse(data, safe=False)
+@csrf_exempt  # Отключаем CSRF для мобильного приложения
+def save_gemini_chat(request):
+    
+    if request.method != "POST":
+        return JsonResponse({"error": "Только POST запросы"}, status=405)
+
+    user = check_token(request)
+    if isinstance(user, JsonResponse):
+        return user  # Возвращаем ошибку, если токен неверный
+
+    try:
+        body = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Неверный JSON формат"}, status=400)
+
+    # Проверяем, что обязательные поля есть
+    question = body.get("question", "").strip()
+    answer   = body.get("answer",   "").strip()
+    time = body.get("time", "").strip()
+
+    if not question:
+        return JsonResponse({"error": "Поле 'question' обязательно"}, status=400)
+    if not answer:
+        return JsonResponse({"error": "Поле 'answer' обязательно"}, status=400)
+    if not time:
+        return JsonResponse({"error": "Поле 'time' обязательно"}, status=400)
+
+    # Сохраняем в базу данных
+    chat = GeminiChat.objects.create(
+        user=user,
+        question=question,
+        answer=answer,
+        time=time
+    )
+
+    # Возвращаем успешный ответ
+    return JsonResponse({
+        "success": True,
+        "id": str(chat.id),
+        "message": "Сохранено успешно"
+    }, status=201)
+
+
+# @csrf_exempt
+# def get_gemini_history(request):
+
+#     if request.method != "GET":
+#         return JsonResponse({"error": "Только GET запросы"}, status=405)
+
+#     user = check_token(request)
+#     if isinstance(user, JsonResponse):
+#         return user
+
+#     # Получаем все вопросы этого пользователя (последние 50)
+#     chats = GeminiChat.objects.filter(user=user)[:50]
+
+#     data = []
+#     for chat in chats:
+#         data.append({
+#             "id":         str(chat.id),
+#             "question":   chat.question,
+#             "answer":     chat.answer,
+#             "created_at": chat.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+#         })
+
+#     return JsonResponse(data, safe=False)

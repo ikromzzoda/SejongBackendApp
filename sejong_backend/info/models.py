@@ -194,3 +194,41 @@ class Notice(models.Model):
             self.image_url = [f'https://drive.google.com/uc?id={match.group(1)}'] if match else None
 
             super().save(update_fields=['image_url'])
+
+
+class GeminiChat(models.Model):
+    
+    # Пользователь, который задал вопрос (связь с токеном авторизации)
+    user = models.ForeignKey(
+        'users.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        help_text="Пользователь, который задал вопрос"
+    )
+
+    # Текст вопроса, который студент отправил в Gemini
+    question = models.TextField(
+        blank=False,
+        help_text="Вопрос студента (например: 'Переведи слово 안녕하세요')"
+    )
+
+    # Ответ, который вернул Gemini
+    answer = models.TextField(
+        blank=False,
+        help_text="Ответ Gemini на вопрос студента"
+    )
+
+    # Дата и время сохраняются автоматически при создании записи
+    time = models.DateTimeField(
+        auto_now_add=True,
+        help_text="Дата и время отправки вопроса"
+    )
+
+    class Meta:
+        db_table = 'gemini_chats'
+        ordering = ['-time']  # Новые вопросы будут первыми
+
+    def __str__(self):
+        username = self.user.username if self.user else "Аноним"
+        return f"[{username}] {self.question[:50]}..."

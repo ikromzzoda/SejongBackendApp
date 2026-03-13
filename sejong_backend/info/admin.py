@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Schedule, TimeSlot, Announcement, AnnouncementImage, Notice
+from .models import Schedule, TimeSlot, Announcement, AnnouncementImage, Notice, GeminiChat
 
 @admin.register(Schedule)
 class ScheduleAdmin(admin.ModelAdmin):
@@ -42,3 +42,18 @@ class AnnouncementAdmin(admin.ModelAdmin):
     list_display = ('title_eng',)
     search_fields = ('title_eng',)
     list_filter = ('title_eng',)
+
+
+
+@admin.register(GeminiChat)
+class GeminiChatAdmin(admin.ModelAdmin):
+    list_display  = ('user', 'time')
+    search_fields = ('question', 'answer', 'user__username')
+    readonly_fields = ('user', 'question', 'answer', 'time')
+    ordering = ('-time',)
+
+    def short_question(self, obj):
+        """Показывает первые 60 символов вопроса в списке"""
+        return obj.question[:60] + '...' if len(obj.question) > 60 else obj.question
+
+    short_question.short_description = 'Вопрос'
