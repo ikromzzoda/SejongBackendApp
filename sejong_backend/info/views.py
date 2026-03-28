@@ -129,51 +129,51 @@ def save_gemini_chat(request):
     # Проверяем, что обязательные поля есть
     question = body.get("question", "").strip()
     answer   = body.get("answer",   "").strip()
-    time = body.get("time", "").strip()
 
     if not question:
         return JsonResponse({"error": "Поле 'question' обязательно"}, status=400)
     if not answer:
         return JsonResponse({"error": "Поле 'answer' обязательно"}, status=400)
-    if not time:
-        return JsonResponse({"error": "Поле 'time' обязательно"}, status=400)
+  
 
     # Сохраняем в базу данных
     chat = GeminiChat.objects.create(
         user=user,
         question=question,
-        answer=answer,
-        time=time
+        answer=answer
     )
 
     # Возвращаем успешный ответ
     return JsonResponse({
         "success": True,
-        "id": str(chat.id),
         "message": "Сохранено успешно"
     }, status=201)
 
 
-# @csrf_exempt
-# def get_gemini_history(request):
+@csrf_exempt
+def get_gemini_history(request):
+    '''
+    Возвращает историю вопросов и ответов для текущего пользователя.
+    Фронтенд может показывать студенту его историю переводов и вопросов
+    '''
+    if request.method != "GET":
+        return JsonResponse({"error": "Только GET запросы"}, status=405)
 
-#     if request.method != "GET":
-#         return JsonResponse({"error": "Только GET запросы"}, status=405)
+    user = check_token(request)
+    if isinstance(user, JsonResponse):
+        return user
 
-#     user = check_token(request)
-#     if isinstance(user, JsonResponse):
-#         return user
+    # Получаем все вопросы этого пользователя (последние 50)
+    chats = GeminiChat.objects.filter(user=user).order_by('-time')[:50]
 
-#     # Получаем все вопросы этого пользователя (последние 50)
-#     chats = GeminiChat.objects.filter(user=user)[:50]
+    data = []
+    for chat in chats:
+        data.append({
+            #"id":         str(chat.id),
+            "question":   chat.question,
+            "answer":     chat.answer,
+            "time": chat.time.strftime("%Y-%m-%d %H:%M:%S")
+        })
 
-#     data = []
-#     for chat in chats:
-#         data.append({
-#             "id":         str(chat.id),
-#             "question":   chat.question,
-#             "answer":     chat.answer,
-#             "created_at": chat.created_at.strftime("%Y-%m-%d %H:%M:%S"),
-#         })
-
-#     return JsonResponse(data, safe=False)
+    return JsonResponse(data, safe=False)
+ 
