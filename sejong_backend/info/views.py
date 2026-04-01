@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from .models import Schedule, Announcement, Notice
 from rest_framework.authtoken.models import Token
-from .models import GeminiChat
+from .models import GeminiChat, GeminiMessage
 import json
 from django.views.decorators.csrf import csrf_exempt
 from google import genai
@@ -113,6 +113,23 @@ def get_notices(request):
 
 @csrf_exempt  # Отключаем CSRF для мобильного приложения
 def save_gemini_chat(request):
+
+    """"
+    POST /gemini/save/
+
+    Тело запроса (JSON):
+    {
+        "chat_id":  "уникальный-id-чата-с-фронта",
+        "title":    "Название чата",
+        "question": "Вопрос пользователя",
+        "answer":   "Ответ Gemini"
+    }
+
+    Логика:
+    - Если чат с таким chat_id уже существует → добавляем новое сообщение (question/answer)
+    - Если чата нет → создаём чат, затем добавляем первое сообщение
+    Таким образом один chat_id может содержать много пар question/answer. 
+    """
     
     if request.method != "POST":
         return JsonResponse({"error": "Только POST запросы"}, status=405)
@@ -127,35 +144,77 @@ def save_gemini_chat(request):
         return JsonResponse({"error": "Неверный JSON формат"}, status=400)
 
     # Проверяем, что обязательные поля есть
+    chat_id  = body.get("chat_id",  "").strip()
+    title    = body.get("title",    "").strip()
     question = body.get("question", "").strip()
     answer   = body.get("answer",   "").strip()
 
+    # Валидация
+    if not chat_id:
+        return JsonResponse({"error": "Поле 'chat_id' обязательно"}, status=400)
+    if not title:
+        return JsonResponse({"error": "Поле 'title' обязательно"}, status=400)
     if not question:
         return JsonResponse({"error": "Поле 'question' обязательно"}, status=400)
     if not answer:
         return JsonResponse({"error": "Поле 'answer' обязательно"}, status=400)
   
-
-    # Сохраняем в базу данных
-    chat = GeminiChat.objects.create(
-        user=user,
-        question=question,
-        answer=answer
+    # Получаем или создаём чат
+    chat, created = GeminiChat.objects.get_or_create(
+        chat_id=chat_id,
+        defaults={
+            "user": user,
+            "title": title
+        }
     )
 
-    # Возвращаем успешный ответ
+    # защита — чужой chat_id
+    if chat.user != user:
+        return JsonResponse({"error": "Нет доступа к этому чату"}, status=403)
+
+    # Обновление title (если фронт поменял)
+    if chat.title != title:
+        chat.title = title
+        chat.save(update_fields=["title"])
+    
+    # Добавляем новое сообщение в этот чат
+    # Один chat_id → много GeminiMessage (question + answer)
+    message = GeminiMessage.objects.create(
+        chat=chat,
+        question=question,
+        answer=answer,
+    )
+
     return JsonResponse({
         "success": True,
-        "message": "Сохранено успешно"
+        "chat_created": created,           # True если чат был создан, False если уже существовал
+        #"message_id": str(message.pk),     # id сохранённого сообщения
+        #"chat_id": chat.chat_id,
+        "title": chat.title,
     }, status=201)
 
 
 @csrf_exempt
 def get_gemini_history(request):
-    '''
-    Возвращает историю вопросов и ответов для текущего пользователя.
-    Фронтенд может показывать студенту его историю переводов и вопросов
-    '''
+    """
+    GET /gemini/history/
+
+    Возвращает все чаты пользователя вместе со всеми сообщениями.
+    Структура ответа:
+    [
+        {
+            "chat_id": "...",
+            "title":   "...",
+            "created_at": "...",
+            "messages": [
+                {"question": "...", "answer": "...", "time": "..."},
+                ...  // все пары question/answer этого чата
+            ]
+        },
+        ...
+    ]
+    """
+
     if request.method != "GET":
         return JsonResponse({"error": "Только GET запросы"}, status=405)
 
@@ -163,17 +222,25 @@ def get_gemini_history(request):
     if isinstance(user, JsonResponse):
         return user
 
-    # Получаем все вопросы этого пользователя (последние 50)
-    chats = GeminiChat.objects.filter(user=user).order_by('-time')[:50]
+    # prefetch_related — одним запросом подтягиваем все сообщения для каждого чата
+    chats = GeminiChat.objects.filter(user=user).prefetch_related('messages').order_by('-created_at')
 
     data = []
     for chat in chats:
+        messages_data = [
+            {
+                "question": msg.question,
+                "answer":   msg.answer,
+                #"time":     msg.time.strftime("%Y-%m-%d %H:%M:%S"),
+            }
+            for msg in chat.messages.all()   # уже отсортированы по time (Meta: ordering = ['time'])
+        ]
+
         data.append({
-            #"id":         str(chat.id),
-            "question":   chat.question,
-            "answer":     chat.answer,
-            "time": chat.time.strftime("%Y-%m-%d %H:%M:%S")
+            "chat_id":    chat.chat_id,
+            "title":      chat.title,
+            "created_at": chat.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+            "messages":   messages_data,
         })
 
     return JsonResponse(data, safe=False)
- 

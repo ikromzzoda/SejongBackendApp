@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Schedule, TimeSlot, Announcement, AnnouncementImage, Notice, GeminiChat
+from .models import Schedule, TimeSlot, Announcement, AnnouncementImage, Notice, GeminiChat, GeminiMessage
 
 @admin.register(Schedule)
 class ScheduleAdmin(admin.ModelAdmin):
@@ -44,16 +44,64 @@ class AnnouncementAdmin(admin.ModelAdmin):
     list_filter = ('title_eng',)
 
 
-
+# ─── Gemini ───────────────────────────────────────────────
+ 
+class GeminiMessageInline(admin.TabularInline):
+    """
+    Показывает все сообщения чата прямо внутри страницы чата.
+    Один chat_id → много question/answer пар.
+    """
+    model = GeminiMessage
+    readonly_fields = ('question', 'answer', 'time')
+    extra = 0                      # не показывать пустые строки для добавления
+    can_delete = False             # запретить удаление через inline
+    ordering = ('time',)           # сообщения по порядку
+ 
+ 
 @admin.register(GeminiChat)
 class GeminiChatAdmin(admin.ModelAdmin):
-    list_display  = ('user', 'time')
-    search_fields = ('question', 'answer', 'user__username')
-    readonly_fields = ('user', 'question', 'answer', 'time')
+    list_display = ('chat_id', 'title', 'user', 'created_at', 'message_count')
+    search_fields = ('chat_id', 'title', 'user__username')
+    readonly_fields = ('chat_id', 'user', 'created_at')
+    ordering = ('-created_at',)
+    inlines = [GeminiMessageInline]   # <-- сообщения видны внутри чата
+ 
+    def message_count(self, obj):
+        """Количество сообщений в чате"""
+        return obj.messages.count()
+ 
+    message_count.short_description = 'Сообщений'
+ 
+ 
+@admin.register(GeminiMessage)
+class GeminiMessageAdmin(admin.ModelAdmin):
+    list_display = ('short_question', 'chat', 'time')
+    search_fields = ('question', 'answer', 'chat__chat_id', 'chat__user__username')
+    readonly_fields = ('chat', 'question', 'answer', 'time')
     ordering = ('-time',)
-
+ 
     def short_question(self, obj):
-        """Показывает первые 60 символов вопроса в списке"""
         return obj.question[:60] + '...' if len(obj.question) > 60 else obj.question
-
+ 
     short_question.short_description = 'Вопрос'
+ 
+
+
+
+
+
+
+
+
+# @admin.register(GeminiChat)
+# class GeminiChatAdmin(admin.ModelAdmin):
+#     list_display  = ('user', 'time')
+#     search_fields = ('question', 'answer', 'user__username')
+#     readonly_fields = ('user', 'question', 'answer', 'time')
+#     ordering = ('-time',)
+
+#     def short_question(self, obj):
+#         """Показывает первые 60 символов вопроса в списке"""
+#         return obj.question[:60] + '...' if len(obj.question) > 60 else obj.question
+
+#     short_question.short_description = 'Вопрос'

@@ -196,39 +196,74 @@ class Notice(models.Model):
             super().save(update_fields=['image_url'])
 
 
+
+
+
 class GeminiChat(models.Model):
-    
+        
     # Пользователь, который задал вопрос (связь с токеном авторизации)
     user = models.ForeignKey(
         'users.User',
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         null=True,
         blank=True,
         help_text="Пользователь, который задал вопрос"
     )
 
-    # Текст вопроса, который студент отправил в Gemini
-    question = models.TextField(
-        blank=False,
-        help_text="Вопрос студента (например: 'Переведи слово 안녕하세요')"
+    chat_id = models.CharField(
+        max_length=255,
+        unique=True,
+        help_text="ID чата, приходит с фронтенда"
     )
 
-    # Ответ, который вернул Gemini
-    answer = models.TextField(
-        blank=False,
-        help_text="Ответ Gemini на вопрос студента"
+    title = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text="Название чата"
     )
 
-    # Дата и время сохраняются автоматически при создании записи
-    time = models.DateTimeField(
+    created_at = models.DateTimeField(
         auto_now_add=True,
-        help_text="Дата и время отправки вопроса"
+        help_text="Дата создания чата",
+        null=True
     )
 
     class Meta:
         db_table = 'gemini_chats'
-        ordering = ['-time']  # Новые вопросы будут первыми
+        ordering = ['-created_at']  # Новые вопросы будут первыми
 
     def __str__(self):
-        username = self.user.username if self.user else "Аноним"
-        return f"[{username}] {self.question[:50]}..."
+        return f"{self.title or 'Без названия'} ({self.chat_id})"
+    
+
+class GeminiMessage(models.Model):
+    """
+    Сообщения внутри чата (вопрос + ответ)
+    """
+
+    chat = models.ForeignKey(
+        GeminiChat,
+        on_delete=models.CASCADE,
+        related_name='messages',
+        help_text="К какому чату относится"
+    )
+
+    question = models.TextField(
+        help_text="Вопрос пользователя"
+    )
+
+    answer = models.TextField(
+        help_text="Ответ Gemini"
+    )
+
+    time = models.DateTimeField(
+        auto_now_add=True,
+        help_text="Время сообщения"
+    )
+
+    class Meta:
+        db_table = 'gemini_messages'
+        ordering = ['time']  # сначала старые → потом новые (как в чатах)
+
+    def __str__(self):
+        return f"{self.question[:50]}..."
