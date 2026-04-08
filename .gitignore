@@ -2,6 +2,7 @@
 
 sejong-cloud-ff73493133e6.json
 
+# Environment variables
 .env
 env
 
@@ -48,5 +49,3 @@ wheels/
 .installed.cfg
 *.egg
 
-# Environment variables
-.env
