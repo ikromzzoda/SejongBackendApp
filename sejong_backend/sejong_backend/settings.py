@@ -177,7 +177,7 @@ GOOGLE_DRIVE_STORAGE_JSON_KEY_FILE = 'sejong-cloud-ff73493133e6.json'
 
 CSRF_TRUSTED_ORIGINS = [
     'https://sejong-backend.serveo.net',  # Replace with your Serveo URL
-    "https://sejong-app-container-785993649958.us-central1.run.app",
+    "https://sejong-app-container-847502443673.us-central1.run.app",
     "http://localhost",
     "http://127.0.0.1",
 ]
