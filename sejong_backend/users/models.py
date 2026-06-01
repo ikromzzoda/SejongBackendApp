@@ -1,12 +1,25 @@
+import re
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.db import models
 from django.utils import timezone
 from django.core.validators import RegexValidator
-from gdstorage.storage import GoogleDriveStorage
-import re
 from django.utils.html import format_html
+from gdstorage.storage import GoogleDriveStorage
 
 gd_storage = GoogleDriveStorage()
+
+DEFAULT_AVATAR = "https://drive.google.com/uc?id=1FCfMdEvghunhDuKd1PWQqty_ZPZelqim"
+
+
+def extract_drive_url(url: str) -> str | None:
+    """Извлекает Google Drive ID и возвращает прямую ссылку для отображения."""
+    match = re.search(r'id=([^&]+)', url)
+    if not match:
+        return None
+    return f'https://drive.google.com/uc?id={match.group(1)}'
+
+
+# ─── UserManager ──────────────────────────────────────────────────────────────
 
 class UserManager(BaseUserManager):
     def create_user(self, username, password=None, **extra_fields):
@@ -20,104 +33,104 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    
     def create_superuser(self, username, password=None, **extra_fields):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
-
-        if extra_fields.get("is_staff") is not True:
+        if not extra_fields.get("is_staff"):
             raise ValueError("Superuser must have is_staff=True.")
-        if extra_fields.get("is_superuser") is not True:
+        if not extra_fields.get("is_superuser"):
             raise ValueError("Superuser must have is_superuser=True.")
-        
         return self.create_user(username, password, **extra_fields)
 
     def get_by_natural_key(self, username):
-            return self.get(username=username)
+        return self.get(username=username)
 
 
+# ─── Groups ───────────────────────────────────────────────────────────────────
 
-class User(AbstractBaseUser, PermissionsMixin):
-    objects = UserManager()
-    
-    phone_validator = RegexValidator(
-    regex=r'^\+992\d{9}$',
-    message="Phone number must start with '+992' and be followed by exactly 9 digits."
-)
-
-    STATUS_CHOICES = (
-        ('Student', 'Student'),
-        ('Teacher', 'Teacher'),
-        ('Admin', 'Admin')
-    )
-    username = models.CharField(max_length=100, unique=True, blank=False)
-    fullname = models.CharField(max_length=200, blank=False)
-    email = models.EmailField(unique=True)
-    phone_number = models.CharField(max_length=13, validators=[phone_validator], blank=False)
-    date_of_birth = models.DateField(blank=False, null=False)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Student')
-    group = models.ManyToManyField("Groups", related_name="user_set", blank=True)  
-    avatar = models.ImageField(upload_to="Sejong Cloud/users/avatars", storage=gd_storage, blank=True) 
-    date_joined = models.DateTimeField(default=timezone.now)
-    avatar_id = models.CharField(max_length=250, blank=True, null=True, default="https://drive.google.com/uc?id=1FCfMdEvghunhDuKd1PWQqty_ZPZelqim")
-
-    is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
-
-    USERNAME_FIELD = "username"
-    REQUIRED_FIELDS = ['email', 'phone_number']
-
-    class Meta:
-        db_table = 'users'
-        verbose_name = "User"
-        verbose_name_plural = "Users"
-        ordering = ['-date_joined']
-
-    def get_groups(self):
-        return [group.name for group in self.group.all()]
-    
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-
-        if self.avatar:
-            avatar_url = self.avatar.storage.url(self.avatar.name)
-            match_avatar = re.search(r'id=([^&]+)', avatar_url)
-            self.avatar_id = f'https://drive.google.com/uc?id={match_avatar.group(1)}' if match_avatar else None
-            super().save(update_fields = ['avatar_id'])
-
-    def __str__(self):
-        return self.username
-
-
-
-class Groups(models.Model):    
-    name = models.CharField(max_length=100, blank=False, unique=True)
+class Groups(models.Model):
+    name = models.CharField(max_length=100, unique=True, verbose_name="Название группы")
     created_at = models.DateTimeField(auto_now_add=True)
 
     def user_count(self):
         return self.user_set.count()
-    
-    user_count.short_description = "Count of Participants"
+    user_count.short_description = "Участников"
 
-    # def participant_names(self):
-    #     return [user.fullname for user in self.user_set.all()]
-    
     def participant_names_admin(self):
         return format_html("<br>".join(user.fullname for user in self.user_set.all()))
-    
-    participant_names_admin.short_description = "Participants"
+    participant_names_admin.short_description = "Участники"
 
     class Meta:
         db_table = 'groups'
-        verbose_name = "Group"
-        verbose_name_plural = "Groups"
-        ordering = ['-created_at']
+        verbose_name = "Группа"
+        verbose_name_plural = "Группы"
+        ordering = ['name']
 
     def __str__(self):
         return self.name
 
-# @receiver(post_save, sender=settings.AUTH_USER_MODEL)
-# def create_auth_token(sender, instance=None, created=False, **kwargs):
-#     if created:
-#         Token.objects.create(user=instance)
-    
+
+# ─── User ─────────────────────────────────────────────────────────────────────
+
+class User(AbstractBaseUser, PermissionsMixin):
+    objects = UserManager()
+
+    phone_validator = RegexValidator(
+        regex=r'^\+992\d{9}$',
+        message="Номер должен начинаться с '+992' и содержать 9 цифр после него."
+    )
+
+    STATUS_CHOICES = (
+        ('Student', 'Student'),
+        ('Teacher', 'Teacher'),
+        ('Admin',   'Admin'),
+    )
+
+    username     = models.CharField(max_length=100, unique=True)
+    fullname     = models.CharField(max_length=200)
+    email        = models.EmailField(unique=True)
+    phone_number = models.CharField(max_length=13, validators=[phone_validator])
+    date_of_birth = models.DateField(blank=True, null=True)
+    status       = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Student')
+    group        = models.ManyToManyField(Groups, related_name="user_set", blank=True)
+
+    avatar    = models.ImageField(
+        upload_to="Sejong Cloud/users/avatars",
+        storage=gd_storage,
+        blank=True,
+    )
+    # Кешированная прямая ссылка — заполняется автоматически в save()
+    # Не редактировать вручную (readonly в Admin)
+    avatar_id = models.CharField(
+        max_length=250, blank=True, null=True,
+        default=DEFAULT_AVATAR,
+    )
+
+    date_joined = models.DateTimeField(default=timezone.now)
+    is_active   = models.BooleanField(default=True)
+    is_staff    = models.BooleanField(default=False)
+
+    USERNAME_FIELD  = "username"
+    REQUIRED_FIELDS = ['email', 'phone_number']
+
+    class Meta:
+        db_table = 'users'
+        verbose_name = "Пользователь"
+        verbose_name_plural = "Пользователи"
+        ordering = ['-date_joined']
+
+    def get_groups(self):
+        return [group.name for group in self.group.all()]
+
+    def save(self, *args, **kwargs):
+        # Вычисляем avatar_id ДО сохранения — один save() вместо двух
+        if self.avatar and self.avatar.name:
+            try:
+                url = self.avatar.storage.url(self.avatar.name)
+                self.avatar_id = extract_drive_url(url) or DEFAULT_AVATAR
+            except Exception:
+                pass
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.username

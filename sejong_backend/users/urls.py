@@ -1,14 +1,9 @@
-from django.urls import path, include, re_path
-from . import views
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-    TokenVerifyView,
-)
+from django.urls import path, include
+from .views import ProfileView, ChangeAvatarView, ChangeInfoView
 
 urlpatterns = [
-    path('profile/', views.get_profile_info, name='get_profile_info'),  
-    path('change_info/', views.change_info, name='change_info'),  
-    path('change_avatar/', views.change_avatar, name='change_avatar'),
-    re_path(r'^auth/', include('djoser.urls.authtoken')),
+    path('profile/',      ProfileView.as_view(),      name='profile'),
+    path('change_info/',  ChangeInfoView.as_view(),    name='change-info'),
+    path('change_avatar/', ChangeAvatarView.as_view(), name='change-avatar'),
+    path('auth/',         include('djoser.urls.authtoken')),
 ]

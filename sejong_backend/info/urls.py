@@ -1,10 +1,16 @@
 from django.urls import path
-from . import views
+from .views import (
+    ScheduleListView,
+    AnnouncementListView,
+    NoticeListView,
+    SaveGeminiChatView,
+    GeminiHistoryView,
+)
 
 urlpatterns = [
-    path('schedules/', views.get_schedules, name='get_schedules'),
-    path('announcements/', views.get_all_announcements, name='get_all_announcements'),
-    path('notice/', views.get_notices, name='get_notices'),
-    path('gemini/save/', views.save_gemini_chat, name='save_gemini_chat'),
-    path('gemini/history/', views.get_gemini_history,  name='get_gemini_history'),
+    path('schedules/',       ScheduleListView.as_view(),    name='schedule-list'),
+    path('announcements/',   AnnouncementListView.as_view(), name='announcement-list'),
+    path('notice/',          NoticeListView.as_view(),       name='notice-list'),
+    path('gemini/save/',     SaveGeminiChatView.as_view(),   name='gemini-save'),
+    path('gemini/history/',  GeminiHistoryView.as_view(),    name='gemini-history'),
 ]

@@ -1,53 +1,44 @@
-from django.http import JsonResponse
+from rest_framework.generics import ListAPIView, RetrieveAPIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters
+
 from .models import Book
-from rest_framework.authtoken.models import Token
+from .serializers import BookSerializer
 
 
-def check_token(request):
-    auth_token = request.headers.get("token")
-    if not auth_token:
-        return JsonResponse({"error": "Token not provided"}, status=401)
+class BookListView(ListAPIView):
+    """
+    GET /api/elibrary/
+    Возвращает список всех книг.
+    Поддерживает фильтрацию по жанру и поиск по названию/автору.
 
-    try:
-        token = Token.objects.get(key=auth_token)
-        user = token.user
-    except Token.DoesNotExist:
-        return JsonResponse({"error": "Invalid token"}, status=401)
+    Примеры:
+        /api/elibrary/?genres=Книги Sejong
+        /api/elibrary/?search=корейский
+    """
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
-    return user
-
-def get_all_books(request):
-    if request.method == "GET":
-        user = check_token(request)
-        if isinstance(user, JsonResponse):
-            return user  # Возвращаем ошибку, если токен неверный
-        
-        books = Book.objects.all()
-        data = []
-        
-        for book in books:
-            data.append({
-                "title": {
-                    "taj": book.title_taj,
-                    "rus": book.title_rus,
-                    "eng": book.title_eng,
-                    "kor": book.title_kor
-                },
-                "description": {
-                    "taj": book.description_taj,
-                    "rus": book.description_rus,
-                    "eng": book.description_eng,
-                    "kor": book.description_kor
-                },
-                'author': book.author,
-                'cover': book.cover_id,
-                'file': book.file_id,
-                'genres': book.genres,
-                'published_date': book.published_date,
-                'created_at': book.created_at,
-            })
-        return JsonResponse(data, safe=False)
+    # Фильтрация и поиск — django-filter уже стоит в requirements.txt
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['genres']
+    search_fields = ['title_eng', 'title_rus', 'title_taj', 'title_kor', 'author']
+    ordering_fields = ['created_at', 'published_date']
+    ordering = ['-created_at']
 
 
-
-
+class BookDetailView(RetrieveAPIView):
+    """
+    GET /api/elibrary/<id>/
+    Возвращает одну книгу по ID.
+    """
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
